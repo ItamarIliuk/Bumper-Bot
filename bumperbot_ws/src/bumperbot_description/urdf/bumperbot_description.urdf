@@ -3,23 +3,22 @@
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
-  name="bumperbot_description">
-  <link name="base_footprint"/>
+  name="description">
   <link
     name="base_link">
     <inertial>
       <origin
-        xyz="-0.00200962161040288 -0.002773872071986 0.0152335734876642"
+        xyz="-0.00200985226721874 -0.00277448578669132 0.0152338681517865"
         rpy="0 0 0" />
       <mass
-        value="0.0913060531508687" />
+        value="0.091306007508054" />
       <inertia
-        ixx="2.35538590970128E-05"
-        ixy="8.03604691787812E-08"
-        ixz="-1.30819390431332E-07"
-        iyy="9.54188332676489E-06"
-        iyz="3.13043067897493E-09"
-        izz="2.77334907271241E-05" />
+        ixx="2.35544148873919E-05"
+        ixy="8.03602673247749E-08"
+        ixz="-1.30819394891219E-07"
+        iyy="9.54438344720785E-06"
+        iyz="3.1304162447774E-09"
+        izz="2.77362876053001E-05" />
     </inertial>
     <visual>
       <origin
@@ -45,79 +44,21 @@
       </geometry>
     </collision>
   </link>
-  <joint name="base_joint" type="fixed">
-    <parent link="base_footprint"/>
-    <child link="base_link"/>
-    <origin xyz="0.0 0.0 0.033" rpy="0 0 0"/>
-  </joint>
-  <link
-    name="wheel_left_link">
-    <inertial>
-      <origin
-        xyz="-3.8757E-05 -0.00067513 0.013705"
-        rpy="0 0 0" />
-      <mass
-        value="0.053009" />
-      <inertia
-        ixx="1.8789E-05"
-        ixy="1.1523E-09"
-        ixz="-2.2364E-10"
-        iyy="1.883E-05"
-        iyz="-4.3552E-10"
-        izz="3.1151E-05" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://bumperbot_description/meshes/wheel_left_link.STL" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.83137 0.67059 0.12941 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://bumperbot_description/meshes/wheel_left_link.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="wheel_left_joint"
-    type="continuous">
-    <origin
-      xyz="0 0.07011 0"
-      rpy="1.5708 0.26876 -3.1416" />
-    <parent
-      link="base_link" />
-    <child
-      link="wheel_left_link" />
-    <axis
-      xyz="0 0 1" />
-  </joint>
   <link
     name="wheel_right_link">
     <inertial>
       <origin
-        xyz="2.9582E-05 -0.0006756 0.013705"
+        xyz="-3.87574191866857E-05 -0.000675136097099426 0.0137052643928599"
         rpy="0 0 0" />
       <mass
-        value="0.053009" />
+        value="0.053008609096452" />
       <inertia
-        ixx="1.879E-05"
-        ixy="-2.9576E-09"
-        ixz="-1.7844E-10"
-        iyy="1.883E-05"
-        iyz="-4.557E-10"
-        izz="3.1151E-05" />
+        ixx="1.87894517500837E-05"
+        ixy="1.15237668840752E-09"
+        ixz="-2.23519263136044E-10"
+        iyy="1.88301476416877E-05"
+        iyz="-4.35362581811824E-10"
+        izz="3.11510738647586E-05" />
     </inertial>
     <visual>
       <origin
@@ -130,7 +71,7 @@
       <material
         name="">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
+          rgba="0.831372549019608 0.670588235294118 0.129411764705882 1" />
       </material>
     </visual>
     <collision>
@@ -148,7 +89,7 @@
     type="continuous">
     <origin
       xyz="0 -0.07011 0"
-      rpy="-1.5708 -1.0554 3.1416" />
+      rpy="-1.5708 -0.95428 3.1416" />
     <parent
       link="base_link" />
     <child
@@ -157,20 +98,73 @@
       xyz="0 0 1" />
   </joint>
   <link
+    name="wheel_left_link">
+    <inertial>
+      <origin
+        xyz="2.9582904985663E-05 -0.00067559856452068 0.0137052653316698"
+        rpy="0 0 0" />
+      <mass
+        value="0.0530086043219396" />
+      <inertia
+        ixx="1.87896350584484E-05"
+        ixy="-2.95771466626165E-09"
+        ixz="-1.78539279878783E-10"
+        iyy="1.88299649252084E-05"
+        iyz="-4.55866473624459E-10"
+        izz="3.11510738759224E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://bumperbot_description/meshes/wheel_left_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://bumperbot_description/meshes/wheel_left_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wheel_left_joint"
+    type="continuous">
+    <origin
+      xyz="0 0.07011 0"
+      rpy="1.5708 0.36986 3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel_left_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
     name="caster_front_link">
     <inertial>
       <origin
-        xyz="0 0 -0.0047625"
+        xyz="3.89968128948481E-07 2.40073004694613E-07 0.00219173397061508"
         rpy="0 0 0" />
       <mass
-        value="4.5247E-07" />
+        value="1.44379265037903E-06" />
       <inertia
-        ixx="4.1051E-12"
-        ixy="0"
-        ixz="0"
-        iyy="4.1051E-12"
-        iyz="0"
-        izz="4.1051E-12" />
+        ixx="7.23075276010246E-11"
+        ixy="-6.10956883468768E-16"
+        ixz="2.22849693525086E-15"
+        iyy="3.8713793085917E-11"
+        iyz="2.93909858781801E-15"
+        izz="1.00967486676306E-10" />
     </inertial>
     <visual>
       <origin
@@ -200,30 +194,30 @@
     name="caster_front_joint"
     type="fixed">
     <origin
-      xyz="0.042791 0.00016909 -0.024363"
-      rpy="1.5708 0 -1.6063" />
+      xyz="0.04755 0 -0.025363"
+      rpy="0 0 0" />
     <parent
       link="base_link" />
     <child
       link="caster_front_link" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 0" />
   </joint>
   <link
     name="caster_rear_link">
     <inertial>
       <origin
-        xyz="0 0 0.0047625"
+        xyz="3.8996812895542E-07 2.40073004698083E-07 0.00219173397061508"
         rpy="0 0 0" />
       <mass
-        value="4.5247E-07" />
+        value="1.44379265037902E-06" />
       <inertia
-        ixx="4.1051E-12"
-        ixy="0"
-        ixz="0"
-        iyy="4.1051E-12"
-        iyz="0"
-        izz="4.1051E-12" />
+        ixx="7.23075276010246E-11"
+        ixy="-6.10956872361E-16"
+        ixz="2.22849693527162E-15"
+        iyy="3.87137930859167E-11"
+        iyz="2.93909858786235E-15"
+        izz="1.00967486676306E-10" />
     </inertial>
     <visual>
       <origin
@@ -236,7 +230,7 @@
       <material
         name="">
         <color
-          rgba="1 0 0 1" />
+          rgba="0.258823529411765 0.27843137254902 0.301960784313725 1" />
       </material>
     </visual>
     <collision>
@@ -253,30 +247,30 @@
     name="caster_rear_joint"
     type="fixed">
     <origin
-      xyz="-0.042791 -0.00016909 -0.024363"
-      rpy="1.5708 0 -1.6063" />
+      xyz="-0.04755 0 -0.025363"
+      rpy="0 0 0" />
     <parent
       link="base_link" />
     <child
       link="caster_rear_link" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 0" />
   </joint>
   <link
     name="camera_link">
     <inertial>
       <origin
-        xyz="-0.026854 -0.008234 0.013499"
+        xyz="-0.0122943599302166 -9.0517329706663E-07 0.008436849003846"
         rpy="0 0 0" />
       <mass
-        value="0.0041086" />
+        value="0.0041086489783227" />
       <inertia
-        ixx="3.4464E-07"
-        ixy="-1.0176E-07"
-        ixz="5.6259E-11"
-        iyy="4.8274E-07"
-        iyz="-1.1811E-10"
-        izz="4.1821E-07" />
+        ixx="3.98797447678453E-07"
+        ixy="-8.24558929782781E-11"
+        ixz="1.22069699665359E-07"
+        iyy="4.18205575812023E-07"
+        iyz="-1.01562924198133E-10"
+        izz="4.28578734986183E-07" />
     </inertial>
     <visual>
       <origin
@@ -289,7 +283,7 @@
       <material
         name="">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
     <collision>
@@ -306,8 +300,8 @@
     name="camera_joint"
     type="fixed">
     <origin
-      xyz="0.040774 -0.0135 0.081"
-      rpy="1.5708 0 -3.1416" />
+      xyz="0.081561 0 0.067457"
+      rpy="0 -0.23739 0" />
     <parent
       link="base_link" />
     <child
@@ -319,17 +313,17 @@
     name="laser_link">
     <inertial>
       <origin
-        xyz="0 0 0"
+        xyz="-0.0119457804060619 -0.000381929217680516 -0.0170649378129477"
         rpy="0 0 0" />
       <mass
-        value="0" />
+        value="0.073084435549317" />
       <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        ixx="1.96074931730795E-05"
+        ixy="-3.62091076640008E-07"
+        ixz="4.28230084046735E-07"
+        iyy="2.40983835136327E-05"
+        iyz="1.50180909250648E-08"
+        izz="4.14184164228596E-05" />
     </inertial>
     <visual>
       <origin
@@ -342,7 +336,7 @@
       <material
         name="">
         <color
-          rgba="1 1 1 1" />
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
     <collision>
@@ -359,12 +353,65 @@
     name="laser_joint"
     type="fixed">
     <origin
-      xyz="-0.0877495976327923 -0.140414680218275 -0.640692319552455"
-      rpy="1.5707963267949 0 -3.08450753931019" />
+      xyz="-0.0050526 -0.0023221 0.1208"
+      rpy="0 0 0" />
     <parent
       link="base_link" />
     <child
       link="laser_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="imu_link">
+    <inertial>
+      <origin
+        xyz="-0.00552433659106684 0.000168210391520349 0.000514000497342681"
+        rpy="0 0 0" />
+      <mass
+        value="0.000528415362211671" />
+      <inertia
+        ixx="1.46176048428261E-08"
+        ixy="1.4001511794942E-10"
+        ixz="-1.99633872937415E-12"
+        iyy="8.59662482954888E-09"
+        iyz="7.52375112767954E-12"
+        izz="2.30279421279312E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://bumperbot_description/meshes/imu_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://bumperbot_description/meshes/imu_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="imu_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0.069899"
+      rpy="3.1416 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="imu_link" />
     <axis
       xyz="0 0 0" />
   </joint>
