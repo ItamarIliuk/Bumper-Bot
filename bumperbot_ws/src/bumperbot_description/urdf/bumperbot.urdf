@@ -44,6 +44,11 @@
       </geometry>
     </collision>
   </link>
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link" />
+    <origin xyz="0 0 0.033" rpy="0 0 0"/>
+  </joint>
   <link
     name="wheel_right_link">
     <inertial>
@@ -194,7 +199,7 @@
     name="caster_front_joint"
     type="fixed">
     <origin
-      xyz="0.04755 0 -0.025363"
+      xyz="0.04755 0 -0.0285"
       rpy="0 0 0" />
     <parent
       link="base_link" />
@@ -247,7 +252,7 @@
     name="caster_rear_joint"
     type="fixed">
     <origin
-      xyz="-0.04755 0 -0.025363"
+      xyz="-0.04755 0 -0.0285"
       rpy="0 0 0" />
     <parent
       link="base_link" />
