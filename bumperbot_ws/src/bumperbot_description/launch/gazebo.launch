@@ -1,7 +1,7 @@
 <launch>
-  <arg name="model" default="$(find bumperbot_description)/urdf/bumperbot.urdf"/>
+  <arg name="model" default="$(find bumperbot_description)/urdf/bumperbot.urdf.xacro"/>
 
-  <param name="robot_description" textfile="$(arg model)" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="paused" value="false"/>
