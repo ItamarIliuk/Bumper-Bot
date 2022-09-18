@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
 )
 
+catkin_python_setup()
+
 add_message_files(
   FILES
   BumperbotMsg.msg
@@ -40,10 +42,15 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+catkin_install_python(PROGRAMS 
+    nodes/bumperbot_node.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 add_library(bumperbot src/bumperbot.cpp)
 add_dependencies(bumperbot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(bumperbot ${catkin_LIBRARIES})
 
-add_executable(bumperbot_node src/bumperbot_node.cpp src/bumperbot.cpp)
+add_executable(bumperbot_node nodes/bumperbot_node.cpp src/bumperbot.cpp)
 add_dependencies(bumperbot_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(bumperbot_node ${catkin_LIBRARIES})
