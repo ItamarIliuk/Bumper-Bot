@@ -1,8 +1,7 @@
 #include "bumperbot_controller/simple_controller.h"
 #include <std_msgs/Float64.h>
 #include <Eigen/Geometry>
-#include <tf/transform_datatypes.h>
-#include <geometry_msgs/Quaternion.h>
+#include <tf2/LinearMath/Quaternion.h>
 
 
 SimpleController::SimpleController(const ros::NodeHandle &nh,
@@ -36,6 +35,10 @@ SimpleController::SimpleController(const ros::NodeHandle &nh,
     odom_msg_.pose.pose.orientation.y = 0.0;
     odom_msg_.pose.pose.orientation.z = 0.0;
     odom_msg_.pose.pose.orientation.w = 1.0;
+
+    transformStamped_.header.frame_id = "odom";
+    transformStamped_.child_frame_id = "base_footprint";
+    transformStamped_.transform.translation.z = 0.0;
 
     prev_time_ = ros::Time::now();
 }
@@ -91,13 +94,28 @@ void SimpleController::jointCallback(const sensor_msgs::JointState &state)
     y_ += d_s * sin(theta_);
 
     // Compose and publish the odom message
-    geometry_msgs::Quaternion orientation(tf::createQuaternionMsgFromYaw(theta_));
+    // geometry_msgs::Quaternion orientation(tf::createQuaternionMsgFromYaw(theta_));
+    tf2::Quaternion q;
+    q.setRPY(0, 0, theta_);
     odom_msg_.header.stamp = ros::Time::now();
     odom_msg_.pose.pose.position.x = x_;
     odom_msg_.pose.pose.position.y = y_;
-    odom_msg_.pose.pose.orientation = orientation;
+    odom_msg_.pose.pose.orientation.x = q.getX();
+    odom_msg_.pose.pose.orientation.y = q.getY();
+    odom_msg_.pose.pose.orientation.z = q.getZ();
+    odom_msg_.pose.pose.orientation.w = q.getW();
     odom_msg_.twist.twist.linear.x = linear;
     odom_msg_.twist.twist.angular.z = angular;
     odom_pub_.publish(odom_msg_);
-    
+
+    // TF
+    static tf2_ros::TransformBroadcaster br;
+    transformStamped_.transform.translation.x = x_;
+    transformStamped_.transform.translation.y = y_;
+    transformStamped_.transform.rotation.x = q.getX();
+    transformStamped_.transform.rotation.y = q.getY();
+    transformStamped_.transform.rotation.z = q.getZ();
+    transformStamped_.transform.rotation.w = q.getW();
+    transformStamped_.header.stamp = ros::Time::now();
+    br.sendTransform(transformStamped_);
 }

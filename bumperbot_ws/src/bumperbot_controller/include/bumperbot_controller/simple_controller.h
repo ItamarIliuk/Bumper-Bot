@@ -5,6 +5,8 @@
 #include <Eigen/Core>
 #include <sensor_msgs/JointState.h>
 #include <nav_msgs/Odometry.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <geometry_msgs/TransformStamped.h>
 
 
 class SimpleController
@@ -24,6 +26,7 @@ private:
     ros::Subscriber joint_sub_;
     ros::Publisher odom_pub_;
 
+    // Odometry
     double wheel_radius_;
     double wheel_separation_;
     Eigen::Matrix2d speed_conversion_;
@@ -34,4 +37,7 @@ private:
     double x_;
     double y_;
     double theta_;
+
+    // TF
+    geometry_msgs::TransformStamped transformStamped_;
 };
