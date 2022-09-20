@@ -31,4 +31,7 @@ private:
     double left_wheel_prev_pos_;
     ros::Time prev_time_;
     nav_msgs::Odometry odom_msg_;
+    double x_;
+    double y_;
+    double theta_;
 };

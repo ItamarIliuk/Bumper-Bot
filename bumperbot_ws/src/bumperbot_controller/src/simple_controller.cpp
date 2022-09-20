@@ -1,6 +1,8 @@
 #include "bumperbot_controller/simple_controller.h"
 #include <std_msgs/Float64.h>
 #include <Eigen/Geometry>
+#include <tf/transform_datatypes.h>
+#include <geometry_msgs/Quaternion.h>
 
 
 SimpleController::SimpleController(const ros::NodeHandle &nh,
@@ -10,7 +12,10 @@ SimpleController::SimpleController(const ros::NodeHandle &nh,
                                     wheel_radius_(radius),
                                     wheel_separation_(separation),
                                     left_wheel_prev_pos_(0.0),
-                                    right_wheel_prev_pos_(0.0)
+                                    right_wheel_prev_pos_(0.0),
+                                    x_(0.0),
+                                    y_(0.0),
+                                    theta_(0.0)
 {
     right_cmd_pub_ = nh_.advertise<std_msgs::Float64>("wheel_right_controller/command", 10);
     left_cmd_pub_ = nh_.advertise<std_msgs::Float64>("wheel_left_controller/command", 10);
@@ -78,8 +83,19 @@ void SimpleController::jointCallback(const sensor_msgs::JointState &state)
     double linear = (wheel_radius_ * fi_right + wheel_radius_ * fi_left) / 2;
     double angular = (wheel_radius_ * fi_right - wheel_radius_ * fi_left) / wheel_separation_;
 
+    // Calculate the position increment
+    double d_s = (wheel_radius_ * dp_right + wheel_radius_ * dp_left) / 2;
+    double d_theta = (wheel_radius_ * dp_right - wheel_radius_ * dp_left) / wheel_separation_;
+    theta_ += d_theta;
+    x_ += d_s * cos(theta_);
+    y_ += d_s * sin(theta_);
+
     // Compose and publish the odom message
+    geometry_msgs::Quaternion orientation(tf::createQuaternionMsgFromYaw(theta_));
     odom_msg_.header.stamp = ros::Time::now();
+    odom_msg_.pose.pose.position.x = x_;
+    odom_msg_.pose.pose.position.y = y_;
+    odom_msg_.pose.pose.orientation = orientation;
     odom_msg_.twist.twist.linear.x = linear;
     odom_msg_.twist.twist.angular.z = angular;
     odom_pub_.publish(odom_msg_);
