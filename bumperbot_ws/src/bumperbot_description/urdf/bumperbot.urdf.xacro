@@ -7,7 +7,7 @@
   
   <link name="base_link">
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0.04" rpy="0.0 0.65 0.3" />
       <mass value="8.2573504e-01"/>
       <inertia ixx="2.2124416e-03" ixy="-1.2294101e-05" ixz="3.4938785e-05"
                iyy="2.1193702e-03" iyz="-5.0120904e-06"
@@ -38,7 +38,7 @@
 
   <link name="wheel_right_link">
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 -0.014 0" rpy="0 0 0" />
       <mass value="0.0530086090966721" />
       <inertia ixx="1.88176298336665E-05" ixy="-4.8444933029987E-10" ixz="1.88163708851143E-08"
                iyy="3.11510738647764E-05" iyz="-6.93560663069607E-11"
@@ -71,7 +71,7 @@
   <link
     name="wheel_left_link">
     <inertial>
-      <origin xyz="0.000216638831504246 0.0137052653316193 -0.000640606107818048" rpy="0 0 0" />
+      <origin xyz="0 0.014 0" rpy="0 0 0" />
       <mass value="0.0530086043217644" />
       <inertia ixx="1.8792911368909E-05"  ixy="3.31256392204584E-10" ixz="-1.14082001662767E-08"
                iyy="3.11510738759073E-05" iyz="-3.60499245082192E-10"
@@ -121,7 +121,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.030 0.020 0.008"/>
+        <box size="0.030 0.020 0.0095"/>
       </geometry>
     </collision>
   </link>
@@ -153,7 +153,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.030 0.020 0.008"/>
+        <box size="0.030 0.020 0.0095"/>
       </geometry>
     </collision>
   </link>
