@@ -16,6 +16,8 @@ SimpleController::SimpleController(const ros::NodeHandle &nh,
                                     y_(0.0),
                                     theta_(0.0)
 {
+    ROS_INFO_STREAM("Using wheel_radius " << wheel_radius_);
+    ROS_INFO_STREAM("Using wheel_separation " << wheel_separation_);
     right_cmd_pub_ = nh_.advertise<std_msgs::Float64>("wheel_right_controller/command", 10);
     left_cmd_pub_ = nh_.advertise<std_msgs::Float64>("wheel_left_controller/command", 10);
     vel_sub_ = nh_.subscribe("cmd_vel", 1000, &SimpleController::velCallback, this);
