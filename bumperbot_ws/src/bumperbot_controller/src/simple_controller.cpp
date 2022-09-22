@@ -97,7 +97,6 @@ void SimpleController::jointCallback(const sensor_msgs::JointState &state)
     y_ += d_s * sin(theta_);
 
     // Compose and publish the odom message
-    // geometry_msgs::Quaternion orientation(tf::createQuaternionMsgFromYaw(theta_));
     tf2::Quaternion q;
     q.setRPY(0, 0, theta_);
     odom_msg_.header.stamp = ros::Time::now();
