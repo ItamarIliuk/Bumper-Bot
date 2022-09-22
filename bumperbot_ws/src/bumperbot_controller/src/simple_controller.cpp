@@ -16,8 +16,8 @@ SimpleController::SimpleController(const ros::NodeHandle &nh,
                                     y_(0.0),
                                     theta_(0.0)
 {
-    ROS_INFO_STREAM("Using wheel_radius " << wheel_radius_);
-    ROS_INFO_STREAM("Using wheel_separation " << wheel_separation_);
+    ROS_INFO_STREAM("Using wheel radius " << wheel_radius_);
+    ROS_INFO_STREAM("Using wheel separation " << wheel_separation_);
     right_cmd_pub_ = nh_.advertise<std_msgs::Float64>("wheel_right_controller/command", 10);
     left_cmd_pub_ = nh_.advertise<std_msgs::Float64>("wheel_left_controller/command", 10);
     vel_sub_ = nh_.subscribe("cmd_vel", 1000, &SimpleController::velCallback, this);
@@ -27,6 +27,7 @@ SimpleController::SimpleController(const ros::NodeHandle &nh,
     speed_conversion_ << wheel_radius_/2, wheel_radius_/2, wheel_radius_/wheel_separation_, -wheel_radius_/wheel_separation_;
     ROS_INFO_STREAM("The conversion matrix is \n" << speed_conversion_);
 
+    // Fill the Odometry message with invariant parameters
     odom_msg_.header.frame_id = "odom";
     odom_msg_.child_frame_id = "base_footprint";
     odom_msg_.twist.twist.linear.y = 0.0;
@@ -38,9 +39,9 @@ SimpleController::SimpleController(const ros::NodeHandle &nh,
     odom_msg_.pose.pose.orientation.z = 0.0;
     odom_msg_.pose.pose.orientation.w = 1.0;
 
-    transformStamped_.header.frame_id = "odom";
-    transformStamped_.child_frame_id = "base_footprint";
-    transformStamped_.transform.translation.z = 0.0;
+    transform_stamped_.header.frame_id = "odom";
+    transform_stamped_.child_frame_id = "base_footprint";
+    transform_stamped_.transform.translation.z = 0.0;
 
     prev_time_ = ros::Time::now();
 }
@@ -112,12 +113,12 @@ void SimpleController::jointCallback(const sensor_msgs::JointState &state)
 
     // TF
     static tf2_ros::TransformBroadcaster br;
-    transformStamped_.transform.translation.x = x_;
-    transformStamped_.transform.translation.y = y_;
-    transformStamped_.transform.rotation.x = q.getX();
-    transformStamped_.transform.rotation.y = q.getY();
-    transformStamped_.transform.rotation.z = q.getZ();
-    transformStamped_.transform.rotation.w = q.getW();
-    transformStamped_.header.stamp = ros::Time::now();
-    br.sendTransform(transformStamped_);
+    transform_stamped_.transform.translation.x = x_;
+    transform_stamped_.transform.translation.y = y_;
+    transform_stamped_.transform.rotation.x = q.getX();
+    transform_stamped_.transform.rotation.y = q.getY();
+    transform_stamped_.transform.rotation.z = q.getZ();
+    transform_stamped_.transform.rotation.w = q.getW();
+    transform_stamped_.header.stamp = ros::Time::now();
+    br.sendTransform(transform_stamped_);
 }

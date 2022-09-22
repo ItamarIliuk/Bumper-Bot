@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Eigen3 REQUIRED)
 
+catkin_python_setup()
+
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS
@@ -30,6 +32,11 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
+)
+
+catkin_install_python(PROGRAMS 
+    nodes/simple_controller_node.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 add_library(simple_controller src/simple_controller.cpp)

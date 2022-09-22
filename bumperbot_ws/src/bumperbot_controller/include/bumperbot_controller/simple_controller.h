@@ -39,5 +39,5 @@ private:
     double theta_;
 
     // TF
-    geometry_msgs::TransformStamped transformStamped_;
+    geometry_msgs::TransformStamped transform_stamped_;
 };
