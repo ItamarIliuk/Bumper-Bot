@@ -62,8 +62,6 @@ class SimpleController(object):
         robot_speed = np.array([[msg.linear.x],
                                 [msg.angular.z]])
         wheel_speed = np.matmul(np.linalg.inv(self.speed_conversion_), robot_speed) 
-        rospy.loginfo("Requested Speed wrt Robot %s" % robot_speed)
-        rospy.loginfo("Calculated Speed of the Wheels %s" % wheel_speed)
 
         right_speed = Float64(wheel_speed[0, 0])
         left_speed = Float64(wheel_speed[1, 0])

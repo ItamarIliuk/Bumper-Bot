@@ -53,9 +53,6 @@ void SimpleController::velCallback(const geometry_msgs::Twist &msg)
     // Given v and w, calculate the velocities of the wheels
     Eigen::Vector2d robot_speed(msg.linear.x, msg.angular.z);
     Eigen::Vector2d wheel_speed = speed_conversion_.inverse() * robot_speed;
-    ROS_INFO_STREAM("Requested Speed wrt Robot \n" << robot_speed);
-    ROS_INFO_STREAM("Calculated Speed of the Wheels \n" << wheel_speed);
-
     std_msgs::Float64 right_speed;
     right_speed.data = wheel_speed.coeff(0);
     std_msgs::Float64 left_speed;

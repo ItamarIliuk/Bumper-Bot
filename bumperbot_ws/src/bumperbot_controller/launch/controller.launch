@@ -1,7 +1,7 @@
 <launch>
       <arg name="is_simple"         default="true"/>
       <arg name="wheel_radius"      default="0.033"/>
-      <arg name="wheel_separation"  default="0.14"/>
+      <arg name="wheel_separation"  default="0.195"/>
       <arg name="use_python"        default="false"/>
       <arg name="py_suffix"         value=".py"       if="$(arg use_python)"/>
       <arg name="py_suffix"         value=""          unless="$(arg use_python)"/>
