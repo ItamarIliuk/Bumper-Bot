@@ -43,6 +43,6 @@ add_library(simple_controller src/simple_controller.cpp)
 add_dependencies(simple_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(simple_controller ${catkin_LIBRARIES} ${Eigen_LIBRARIES})
 
-add_executable(simple_controller_node nodes/simple_controller_node.cpp src/simple_controller.cpp)
+add_executable(simple_controller_node nodes/simple_controller_node.cpp)
 add_dependencies(simple_controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(simple_controller_node ${catkin_LIBRARIES})
+target_link_libraries(simple_controller_node ${catkin_LIBRARIES} simple_controller)
