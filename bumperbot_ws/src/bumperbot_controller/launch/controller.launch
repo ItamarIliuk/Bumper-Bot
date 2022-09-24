@@ -1,7 +1,7 @@
 <launch>
       <arg name="is_simple"         default="true"/>
       <arg name="wheel_radius"      default="0.033"/>
-      <arg name="wheel_separation"  default="0.195"/>
+      <arg name="wheel_separation"  default="0.17"/>
       <arg name="use_python"        default="false"/>
       <arg name="py_suffix"         value=".py"       if="$(arg use_python)"/>
       <arg name="py_suffix"         value=""          unless="$(arg use_python)"/>
@@ -13,27 +13,29 @@
       <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" 
             respawn="false" output="screen"/>
 
+      <!-- Use the bumperbot_controller -->
       <group if="$(arg is_simple)">
             <rosparam file="$(find bumperbot_controller)/config/simple_controller.yaml" command="load" />
             
-            <!-- Launch the controller manager -->
-            <node name="controller_manager" pkg="controller_manager" type="spawner"
-                  respawn="false" output="screen" args="joint_state_controller wheel_left_controller wheel_right_controller" />
-
             <!-- Launch the simple controller -->
             <node name="simple_controller_node" pkg="bumperbot_controller" type="simple_controller_node$(arg py_suffix)"
                   output="screen" respawn="true">
                   <param name="wheel_radius"     value="$(arg wheel_radius)"/>
                   <param name="wheel_separation" value="$(arg wheel_separation)"/>
             </node>
+
+            <!-- Launch the controller manager with the wheel controller -->
+            <node name="controller_manager" pkg="controller_manager" type="spawner"
+                  respawn="false" output="screen" args="joint_state_controller wheel_left_controller wheel_right_controller" />
       </group>
 
+      <!-- Use the diff_drive_controller from ros_controllers -->
       <group unless="$(arg is_simple)">
             <rosparam file="$(find bumperbot_controller)/config/wheel_controller.yaml" command="load" />
 
             <!-- Launch the controller manager with the diff_drive_controller -->
             <node name="controller_manager" pkg="controller_manager" type="spawner"
-                  respawn="false" output="screen" args="joint_state_controller wheel_controller" />
+                  respawn="false" output="screen" args="joint_state_controller bumperbot_controller" />
       </group>
      
 </launch>

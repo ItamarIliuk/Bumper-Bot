@@ -25,9 +25,9 @@ class SimpleController(object):
         self.theta_ = 0.0
         self.right_cmd_pub_ = rospy.Publisher("wheel_right_controller/command", Float64, queue_size=10)
         self.left_cmd_pub_ = rospy.Publisher("wheel_left_controller/command", Float64, queue_size=10)
-        self.vel_sub_ = rospy.Subscriber("cmd_vel", Twist, self.velCallback)
+        self.vel_sub_ = rospy.Subscriber("bumperbot_controller/cmd_vel", Twist, self.velCallback)
         self.joint_sub_ = rospy.Subscriber("joint_states", JointState, self.jointCallback)        
-        self.odom_pub_ = rospy.Publisher("odom", Odometry, queue_size=10)
+        self.odom_pub_ = rospy.Publisher("bumperbot_controller/odom", Odometry, queue_size=10)
 
         self.speed_conversion_ = np.array([[self.wheel_radius_/2, self.wheel_radius_/2],
                                            [self.wheel_radius_/self.wheel_separation_, -self.wheel_radius_/self.wheel_separation_]])
