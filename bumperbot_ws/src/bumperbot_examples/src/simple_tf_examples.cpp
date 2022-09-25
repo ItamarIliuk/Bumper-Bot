@@ -5,8 +5,10 @@
 
 SimpleTfExamples::SimpleTfExamples(const ros::NodeHandle &nh)
                                   : nh_(nh),
-                                    x_counter_(0.0),
-                                    tf_listener_(tf_buffer_)
+                                    x_increment_(0.05),
+                                    last_x_(0.0),
+                                    tf_listener_(tf_buffer_),
+                                    rotations_counter_(0)
 {
     static tf2_ros::StaticTransformBroadcaster static_broadcaster;
 
@@ -44,7 +46,7 @@ void SimpleTfExamples::timerCallback(const ros::TimerEvent &event)
   dynamic_transform_stamped_.header.stamp = ros::Time::now();
   dynamic_transform_stamped_.header.frame_id = "odom";
   dynamic_transform_stamped_.child_frame_id = "bumperbot_base";
-  dynamic_transform_stamped_.transform.translation.x = x_counter_;
+  dynamic_transform_stamped_.transform.translation.x = last_x_ + x_increment_;
   dynamic_transform_stamped_.transform.translation.y = 0;
   dynamic_transform_stamped_.transform.translation.z = 0;
   // dynamic_transform_stamped_.transform.rotation.x = 0;
@@ -62,8 +64,14 @@ void SimpleTfExamples::timerCallback(const ros::TimerEvent &event)
   dynamic_transform_stamped_.transform.rotation.w = q.w();
 
   dynamic_broadcaster.sendTransform(dynamic_transform_stamped_);
-  x_counter_ += 0.01; // X in meters
+  last_x_ = dynamic_transform_stamped_.transform.translation.x;
   last_orientation_ = q;
+  rotations_counter_++;
+  if(rotations_counter_ >= 100)
+  {
+    orientation_increment_ = orientation_increment_.inverse();
+    rotations_counter_ = 0;
+  }
 }
 
 

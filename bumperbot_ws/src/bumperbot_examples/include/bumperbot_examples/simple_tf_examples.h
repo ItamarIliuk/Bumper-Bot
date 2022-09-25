@@ -22,10 +22,12 @@ private:
     geometry_msgs::TransformStamped static_transform_stamped_;
     geometry_msgs::TransformStamped dynamic_transform_stamped_;
     ros::Timer timer_;
-    double x_counter_;
+    double last_x_;
+    double x_increment_;
     ros::ServiceServer get_transform_srv_;
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener tf_listener_;
     tf2::Quaternion last_orientation_;
     tf2::Quaternion orientation_increment_;
+    int rotations_counter_;
 };
