@@ -6,15 +6,29 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   tf2_ros
+  tf2
   geometry_msgs
+  message_generation
 )
 
 catkin_python_setup()
+
+add_service_files(
+  FILES
+  GetTransform.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
 
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS
     tf2_ros
+    tf2
     geometry_msgs
 )
 
