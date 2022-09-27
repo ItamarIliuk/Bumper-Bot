@@ -25,3 +25,11 @@ catkin_install_python(PROGRAMS
     nodes/simulate_motion_noise_node.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+add_library(simulate_motion_noise src/simulate_motion_noise.cpp)
+add_dependencies(simulate_motion_noise ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(simulate_motion_noise ${catkin_LIBRARIES})
+
+add_executable(simulate_motion_noise_node nodes/simulate_motion_noise_node.cpp)
+add_dependencies(simulate_motion_noise_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(simulate_motion_noise_node ${catkin_LIBRARIES} simulate_motion_noise)

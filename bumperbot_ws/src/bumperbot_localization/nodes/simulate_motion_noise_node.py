@@ -5,6 +5,6 @@ from bumperbot_localization.simulate_motion_noise import MotionNoise
 
 if __name__== '__main__':
     rospy.init_node('simulate_motion_noise_node')
-    bumperbot = MotionNoise()
+    noise = MotionNoise()
 
     rospy.spin()
