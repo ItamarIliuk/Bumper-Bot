@@ -5,7 +5,7 @@
 MotionNoise::MotionNoise(const ros::NodeHandle &nh)
                         : nh_(nh),
                           linear_velocity_sd_(0.1),
-                          angular_velocity_sd_(0.1)
+                          angular_velocity_sd_(0.5)
 {
     noisy_odom_.header.frame_id = "odom";
     noisy_odom_.child_frame_id = "base_footprint";
