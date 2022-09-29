@@ -23,11 +23,15 @@ class SimpleController(object):
         self.x_ = 0.0
         self.y_ = 0.0
         self.theta_ = 0.0
+        self.noisy_x_ = 0.0
+        self.noisy_y_ = 0.0
+        self.noisy_theta_ = 0.0
         self.right_cmd_pub_ = rospy.Publisher("wheel_right_controller/command", Float64, queue_size=10)
         self.left_cmd_pub_ = rospy.Publisher("wheel_left_controller/command", Float64, queue_size=10)
         self.vel_sub_ = rospy.Subscriber("bumperbot_controller/cmd_vel", Twist, self.velCallback)
         self.joint_sub_ = rospy.Subscriber("joint_states", JointState, self.jointCallback)        
         self.odom_pub_ = rospy.Publisher("bumperbot_controller/odom", Odometry, queue_size=10)
+        self.noisy_odom_pub_ = rospy.Publisher("bumperbot_controller/odom_noisy", Odometry, queue_size=10)
 
         self.speed_conversion_ = np.array([[self.wheel_radius_/2, self.wheel_radius_/2],
                                            [self.wheel_radius_/self.wheel_separation_, -self.wheel_radius_/self.wheel_separation_]])
@@ -46,12 +50,31 @@ class SimpleController(object):
         self.odom_msg_.pose.pose.orientation.z = 0.0
         self.odom_msg_.pose.pose.orientation.w = 1.0
 
+        # Fill the Odometry Noisy message with invariant parameters
+        self.noisy_odom_msg_ = Odometry()
+        self.noisy_odom_msg_.header.frame_id = "odom"
+        self.noisy_odom_msg_.child_frame_id = "base_footprint_noisy"
+        self.noisy_odom_msg_.twist.twist.linear.y = 0.0
+        self.noisy_odom_msg_.twist.twist.linear.z = 0.0
+        self.noisy_odom_msg_.twist.twist.angular.x = 0.0
+        self.noisy_odom_msg_.twist.twist.angular.y = 0.0
+        self.noisy_odom_msg_.pose.pose.orientation.x = 0.0
+        self.noisy_odom_msg_.pose.pose.orientation.y = 0.0
+        self.noisy_odom_msg_.pose.pose.orientation.z = 0.0
+        self.noisy_odom_msg_.pose.pose.orientation.w = 1.0
+
         # Fill the TF message
         self.br_ = tf2_ros.TransformBroadcaster()
         self.transform_stamped_ = TransformStamped()
         self.transform_stamped_.header.frame_id = "odom"
         self.transform_stamped_.child_frame_id = "base_footprint"
         self.transform_stamped_.transform.translation.z = 0.0
+
+        # Fill the TF Noisy message
+        self.noisy_transform_stamped_ = TransformStamped()
+        self.noisy_transform_stamped_.header.frame_id = "odom"
+        self.noisy_transform_stamped_.child_frame_id = "base_footprint_noisy"
+        self.noisy_transform_stamped_.transform.translation.z = 0.0
 
         self.prev_time_ = rospy.Time.now()
 
@@ -91,14 +114,18 @@ class SimpleController(object):
         # Calculate the linear and angular velocity
         linear = (self.wheel_radius_ * fi_right + self.wheel_radius_ * fi_left) / 2
         angular = (self.wheel_radius_ * fi_right - self.wheel_radius_ * fi_left) / self.wheel_separation_
+        angular_noisy = (self.wheel_radius_ * fi_right - self.wheel_radius_ * fi_left) / (self.wheel_separation_ + 0.02)
 
         # Calculate the position increment
         d_s = (self.wheel_radius_ * dp_right + self.wheel_radius_ * dp_left) / 2
         d_theta = (self.wheel_radius_ * dp_right - self.wheel_radius_ * dp_left) / self.wheel_separation_
-        direction = self.theta_ + d_theta * 0.5
         self.theta_ += d_theta
         self.x_ += d_s * math.cos(self.theta_)
         self.y_ += d_s * math.sin(self.theta_)
+        d_theta_noisy = (self.wheel_radius_ * dp_right - self.wheel_radius_ * dp_left) / (self.wheel_separation_ + 0.02)
+        self.noisy_theta_ += d_theta_noisy
+        self.noisy_x_ += d_s * math.cos(self.noisy_theta_)
+        self.noisy_y_ += d_s * math.sin(self.noisy_theta_)
         
         # Compose and publish the odom message
         q = tf_conversions.transformations.quaternion_from_euler(0, 0, self.theta_)
@@ -113,6 +140,19 @@ class SimpleController(object):
         self.odom_msg_.twist.twist.angular.z = angular
         self.odom_pub_.publish(self.odom_msg_)
 
+        # Compose and publish the odom message
+        noisy_q = tf_conversions.transformations.quaternion_from_euler(0, 0, self.noisy_theta_)
+        self.noisy_odom_msg_.header.stamp = rospy.Time.now()
+        self.noisy_odom_msg_.pose.pose.position.x = self.noisy_x_
+        self.noisy_odom_msg_.pose.pose.position.y = self.noisy_y_
+        self.noisy_odom_msg_.pose.pose.orientation.x = noisy_q[0]
+        self.noisy_odom_msg_.pose.pose.orientation.y = noisy_q[1]
+        self.noisy_odom_msg_.pose.pose.orientation.z = noisy_q[2]
+        self.noisy_odom_msg_.pose.pose.orientation.w = noisy_q[3]
+        self.noisy_odom_msg_.twist.twist.linear.x = linear
+        self.noisy_odom_msg_.twist.twist.angular.z = angular_noisy
+        self.noisy_odom_pub_.publish(self.noisy_odom_msg_)
+
         # TF
         self.transform_stamped_.transform.translation.x = self.x_
         self.transform_stamped_.transform.translation.y = self.y_
@@ -122,3 +162,13 @@ class SimpleController(object):
         self.transform_stamped_.transform.rotation.w = q[3]
         self.transform_stamped_.header.stamp = rospy.Time.now()
         self.br_.sendTransform(self.transform_stamped_)
+
+        # Noisy TF
+        self.noisy_transform_stamped_.transform.translation.x = self.noisy_x_
+        self.noisy_transform_stamped_.transform.translation.y = self.noisy_y_
+        self.noisy_transform_stamped_.transform.rotation.x = noisy_q[0]
+        self.noisy_transform_stamped_.transform.rotation.y = noisy_q[1]
+        self.noisy_transform_stamped_.transform.rotation.z = noisy_q[2]
+        self.noisy_transform_stamped_.transform.rotation.w = noisy_q[3]
+        self.noisy_transform_stamped_.header.stamp = rospy.Time.now()
+        self.br_.sendTransform(self.noisy_transform_stamped_)
