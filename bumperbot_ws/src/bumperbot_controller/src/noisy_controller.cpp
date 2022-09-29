@@ -1,13 +1,11 @@
-#include "bumperbot_controller/simple_controller.h"
-#include <std_msgs/Float64.h>
-#include <Eigen/Geometry>
+#include "bumperbot_controller/noisy_controller.h"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 
-SimpleController::SimpleController(const ros::NodeHandle &nh,
-                                   double radius,
-                                   double separation)
+NoisyController::NoisyController(const ros::NodeHandle &nh,
+                                 double radius,
+                                 double separation)
                                   : nh_(nh),
                                     wheel_radius_(radius),
                                     wheel_separation_(separation),
@@ -19,18 +17,12 @@ SimpleController::SimpleController(const ros::NodeHandle &nh,
 {
     ROS_INFO_STREAM("Using wheel radius " << wheel_radius_);
     ROS_INFO_STREAM("Using wheel separation " << wheel_separation_);
-    right_cmd_pub_ = nh_.advertise<std_msgs::Float64>("wheel_right_controller/command", 10);
-    left_cmd_pub_ = nh_.advertise<std_msgs::Float64>("wheel_left_controller/command", 10);
-    vel_sub_ = nh_.subscribe("bumperbot_controller/cmd_vel", 1000, &SimpleController::velCallback, this);
-    joint_sub_ = nh_.subscribe("joint_states", 1000, &SimpleController::jointCallback, this);
-    odom_pub_ = nh_.advertise<nav_msgs::Odometry>("bumperbot_controller/odom", 10);
-
-    speed_conversion_ << wheel_radius_/2, wheel_radius_/2, wheel_radius_/wheel_separation_, -wheel_radius_/wheel_separation_;
-    ROS_INFO_STREAM("The conversion matrix is \n" << speed_conversion_);
+    joint_sub_ = nh_.subscribe("joint_states", 1000, &NoisyController::jointCallback, this);
+    odom_pub_ = nh_.advertise<nav_msgs::Odometry>("bumperbot_controller/odom_noisy", 10);
 
     // Fill the Odometry message with invariant parameters
     odom_msg_.header.frame_id = "odom";
-    odom_msg_.child_frame_id = "base_footprint";
+    odom_msg_.child_frame_id = "base_footprint_noisy";
     odom_msg_.twist.twist.linear.y = 0.0;
     odom_msg_.twist.twist.linear.z = 0.0;
     odom_msg_.twist.twist.angular.x = 0.0;
@@ -41,30 +33,14 @@ SimpleController::SimpleController(const ros::NodeHandle &nh,
     odom_msg_.pose.pose.orientation.w = 1.0;
 
     transform_stamped_.header.frame_id = "odom";
-    transform_stamped_.child_frame_id = "base_footprint";
+    transform_stamped_.child_frame_id = "base_footprint_noisy";
     transform_stamped_.transform.translation.z = 0.0;
 
     prev_time_ = ros::Time::now();
 }
 
 
-void SimpleController::velCallback(const geometry_msgs::Twist &msg)
-{
-    // Implements the differential kinematic model
-    // Given v and w, calculate the velocities of the wheels
-    Eigen::Vector2d robot_speed(msg.linear.x, msg.angular.z);
-    Eigen::Vector2d wheel_speed = speed_conversion_.inverse() * robot_speed;
-    std_msgs::Float64 right_speed;
-    right_speed.data = wheel_speed.coeff(0);
-    std_msgs::Float64 left_speed;
-    left_speed.data = wheel_speed.coeff(1);
-
-    right_cmd_pub_.publish(right_speed);
-    left_cmd_pub_.publish(left_speed);
-}
-
-
-void SimpleController::jointCallback(const sensor_msgs::JointState &state)
+void NoisyController::jointCallback(const sensor_msgs::JointState &state)
 {
     // Implements the inverse differential kinematic model
     // Given the position of the wheels, calculates their velocities

@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 import rospy
-from std_msgs.msg import Float64
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import TransformStamped
 import tf_conversions
 import tf2_ros
-import numpy as np
 import math
 
 
-class SimpleController(object):
+class NoisyController(object):
 
     def __init__(self, wheel_radius, wheel_separation):
         rospy.loginfo("Using wheel radius %d" % wheel_radius)
@@ -23,20 +20,13 @@ class SimpleController(object):
         self.x_ = 0.0
         self.y_ = 0.0
         self.theta_ = 0.0
-        self.right_cmd_pub_ = rospy.Publisher("wheel_right_controller/command", Float64, queue_size=10)
-        self.left_cmd_pub_ = rospy.Publisher("wheel_left_controller/command", Float64, queue_size=10)
-        self.vel_sub_ = rospy.Subscriber("bumperbot_controller/cmd_vel", Twist, self.velCallback)
         self.joint_sub_ = rospy.Subscriber("joint_states", JointState, self.jointCallback)        
-        self.odom_pub_ = rospy.Publisher("bumperbot_controller/odom", Odometry, queue_size=10)
+        self.odom_pub_ = rospy.Publisher("bumperbot_controller/odom_noisy", Odometry, queue_size=10)
 
-        self.speed_conversion_ = np.array([[self.wheel_radius_/2, self.wheel_radius_/2],
-                                           [self.wheel_radius_/self.wheel_separation_, -self.wheel_radius_/self.wheel_separation_]])
-        rospy.loginfo("The conversion matrix is %s" % self.speed_conversion_)
-
-        # Fill the Odometry message with invariant parameters
+        # Fill the Odometry Noisy message with invariant parameters
         self.odom_msg_ = Odometry()
         self.odom_msg_.header.frame_id = "odom"
-        self.odom_msg_.child_frame_id = "base_footprint"
+        self.odom_msg_.child_frame_id = "base_footprint_noisy"
         self.odom_msg_.twist.twist.linear.y = 0.0
         self.odom_msg_.twist.twist.linear.z = 0.0
         self.odom_msg_.twist.twist.angular.x = 0.0
@@ -46,28 +36,14 @@ class SimpleController(object):
         self.odom_msg_.pose.pose.orientation.z = 0.0
         self.odom_msg_.pose.pose.orientation.w = 1.0
 
-        # Fill the TF message
+        # Fill the TF Noisy message
         self.br_ = tf2_ros.TransformBroadcaster()
         self.transform_stamped_ = TransformStamped()
         self.transform_stamped_.header.frame_id = "odom"
-        self.transform_stamped_.child_frame_id = "base_footprint"
+        self.transform_stamped_.child_frame_id = "base_footprint_noisy"
         self.transform_stamped_.transform.translation.z = 0.0
 
         self.prev_time_ = rospy.Time.now()
-
-
-    def velCallback(self, msg):
-        # Implements the differential kinematic model
-        # Given v and w, calculate the velocities of the wheels
-        robot_speed = np.array([[msg.linear.x],
-                                [msg.angular.z]])
-        wheel_speed = np.matmul(np.linalg.inv(self.speed_conversion_), robot_speed) 
-
-        right_speed = Float64(wheel_speed[0, 0])
-        left_speed = Float64(wheel_speed[1, 0])
-
-        self.right_cmd_pub_.publish(right_speed)
-        self.left_cmd_pub_.publish(left_speed)
 
 
     def jointCallback(self, msg):

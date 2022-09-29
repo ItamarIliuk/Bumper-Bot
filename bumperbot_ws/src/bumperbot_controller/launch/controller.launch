@@ -1,10 +1,12 @@
 <launch>
-      <arg name="is_simple"         default="true"/>
-      <arg name="wheel_radius"      default="0.033"/>
-      <arg name="wheel_separation"  default="0.17"/>
-      <arg name="use_python"        default="false"/>
-      <arg name="py_suffix"         value=".py"       if="$(arg use_python)"/>
-      <arg name="py_suffix"         value=""          unless="$(arg use_python)"/>
+      <arg name="is_simple"               default="true"/>
+      <arg name="wheel_radius"            default="0.033"/>
+      <arg name="wheel_radius_error"      default="0.0"/>
+      <arg name="wheel_separation"        default="0.17"/>
+      <arg name="wheel_separation_error"  default="0.02"/>
+      <arg name="use_python"              default="false"/>
+      <arg name="py_suffix"               value=".py"       if="$(arg use_python)"/>
+      <arg name="py_suffix"               value=""          unless="$(arg use_python)"/>
 
 
       <rosparam file="$(find joint_state_controller)/joint_state_controller.yaml" command="load"/>
@@ -37,5 +39,12 @@
             <node name="controller_manager" pkg="controller_manager" type="spawner"
                   respawn="false" output="screen" args="joint_state_controller bumperbot_controller" />
       </group>
+
+      <!-- Launch the noisy controller -->
+      <node name="noisy_controller_node" pkg="bumperbot_controller" type="noisy_controller_node$(arg py_suffix)"
+            output="screen" respawn="true">
+            <param name="wheel_radius"     value="$(eval arg('wheel_radius') + arg('wheel_radius_error'))"/>
+            <param name="wheel_separation" value="$(eval arg('wheel_separation') + arg('wheel_separation_error'))"/>
+      </node>
      
 </launch>
