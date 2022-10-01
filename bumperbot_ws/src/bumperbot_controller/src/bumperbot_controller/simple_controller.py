@@ -6,7 +6,7 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import TransformStamped
 import tf_conversions
-import tf2_ros
+from tf2_ros import TransformBroadcaster
 import numpy as np
 import math
 
@@ -47,7 +47,7 @@ class SimpleController(object):
         self.odom_msg_.pose.pose.orientation.w = 1.0
 
         # Fill the TF message
-        self.br_ = tf2_ros.TransformBroadcaster()
+        self.br_ = TransformBroadcaster()
         self.transform_stamped_ = TransformStamped()
         self.transform_stamped_.header.frame_id = "odom"
         self.transform_stamped_.child_frame_id = "base_footprint"

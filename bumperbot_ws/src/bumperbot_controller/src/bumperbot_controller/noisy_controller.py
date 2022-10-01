@@ -4,7 +4,7 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import TransformStamped
 import tf_conversions
-import tf2_ros
+from tf2_ros import TransformBroadcaster
 import math
 
 
@@ -37,7 +37,7 @@ class NoisyController(object):
         self.odom_msg_.pose.pose.orientation.w = 1.0
 
         # Fill the TF Noisy message
-        self.br_ = tf2_ros.TransformBroadcaster()
+        self.br_ = TransformBroadcaster()
         self.transform_stamped_ = TransformStamped()
         self.transform_stamped_.header.frame_id = "odom"
         self.transform_stamped_.child_frame_id = "base_footprint_noisy"
