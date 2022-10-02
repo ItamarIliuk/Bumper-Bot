@@ -16,11 +16,11 @@ class KalmanFilter(object):
         
         # Initially the robot has no idea about how fast is going
         self.mean_ = 0.0
-        self.standard_deviation_ = 1000.0
+        self.variance_ = 1000.0
 
         # Modeling the uncertainty of the sensor and the motion
-        self.motion_standard_deviation_ = 3.0
-        self.measurement_standard_deviation_ = 0.1
+        self.motion_variance_ = 3.0
+        self.measurement_variance_ = 0.1
 
         # Store the messages - only for the orientation
         self.last_imu_ts_ = None
@@ -31,6 +31,7 @@ class KalmanFilter(object):
         self.last_yaw_ = 0.0
         self.x_ = 0.0
         self.y_ = 0.0
+        self.motion_ = 0.0
 
         # Fill the TF Filtered message
         self.br_ = TransformBroadcaster()
@@ -51,9 +52,9 @@ class KalmanFilter(object):
             self.last_odom_ts_ = odom.header.stamp
             self.last_yaw_ = yaw
             self.is_first_odom_ = False
+            return
         
         self.motion_ = yaw - self.last_yaw_
-        self.last_motion_ = yaw
 
         self.statePrediction()
         self.measurementUpdate()
@@ -77,28 +78,33 @@ class KalmanFilter(object):
 
         # Update for the next iteration
         self.last_odom_ts_ = odom.header.stamp
+        self.last_yaw_ = yaw
 
 
     def imuCallback(self, imu):
         if self.is_first_imu_:
+            # Initialization
             self.last_imu_ts_ = imu.header.stamp
             self.is_first_imu_ = False
-        else:
-            dt = (imu.header.stamp - self.last_imu_ts_).to_sec()
-            ds = imu.angular_velocity.z * dt
-            self.imu_theta_ += ds
+            return
+        
+        # Integrate the angular velocity to calculate the orientation
+        dt = (imu.header.stamp - self.last_imu_ts_).to_sec()
+        ds = imu.angular_velocity.z * dt
+        self.imu_theta_ += ds
 
-            # Update for the next iteration
-            self.last_imu_ts_ = imu.header.stamp
+        # Update for the next iteration
+        self.last_imu_ts_ = imu.header.stamp
 
 
     def measurementUpdate(self):
-        self.mean_ = (self.measurement_standard_deviation_ * self.mean_ + self.standard_deviation_ * self.imu_theta_) \
-                   / (self.standard_deviation_ + self.measurement_standard_deviation_)
+        self.mean_ = (self.measurement_variance_ * self.mean_ + self.variance_ * self.imu_theta_) \
+                   / (self.variance_ + self.measurement_variance_)
                      
-        self.standard_deviation_ = (self.standard_deviation_ * self.motion_standard_deviation_) \
-                                 / (self.standard_deviation_ + self.motion_standard_deviation_)
+        self.variance_ = (self.variance_ * self.motion_variance_) \
+                       / (self.variance_ + self.motion_variance_)
+
 
     def statePrediction(self):
         self.mean_ = self.mean_ + self.motion_
-        self.standard_deviation_ = self.standard_deviation_ + self.motion_standard_deviation_
+        self.variance_ = self.variance_ + self.motion_variance_
