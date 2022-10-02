@@ -22,7 +22,7 @@ NoisyController::NoisyController(const ros::NodeHandle &nh,
 
     // Fill the Odometry message with invariant parameters
     odom_msg_.header.frame_id = "odom";
-    odom_msg_.child_frame_id = "base_footprint_noisy";
+    odom_msg_.child_frame_id = "base_footprint_eks";
     odom_msg_.twist.twist.linear.y = 0.0;
     odom_msg_.twist.twist.linear.z = 0.0;
     odom_msg_.twist.twist.angular.x = 0.0;

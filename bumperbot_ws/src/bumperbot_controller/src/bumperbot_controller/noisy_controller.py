@@ -26,7 +26,7 @@ class NoisyController(object):
         # Fill the Odometry Noisy message with invariant parameters
         self.odom_msg_ = Odometry()
         self.odom_msg_.header.frame_id = "odom"
-        self.odom_msg_.child_frame_id = "base_footprint_noisy"
+        self.odom_msg_.child_frame_id = "base_footprint_ekf"
         self.odom_msg_.twist.twist.linear.y = 0.0
         self.odom_msg_.twist.twist.linear.z = 0.0
         self.odom_msg_.twist.twist.angular.x = 0.0
