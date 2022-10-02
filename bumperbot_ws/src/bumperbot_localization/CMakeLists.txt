@@ -32,6 +32,7 @@ include_directories(
 catkin_install_python(PROGRAMS 
     nodes/kalman_filter_node.py
     nodes/imu_republisher_node.py
+    nodes/plot_trajectory_node.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -39,9 +40,17 @@ add_library(kalman_filter src/kalman_filter.cpp)
 add_dependencies(kalman_filter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(kalman_filter ${catkin_LIBRARIES})
 
+add_library(plot_trajectory src/plot_trajectory.cpp)
+add_dependencies(plot_trajectory ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(plot_trajectory ${catkin_LIBRARIES})
+
 add_executable(kalman_filter_node nodes/kalman_filter_node.cpp)
 add_dependencies(kalman_filter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(kalman_filter_node ${catkin_LIBRARIES} kalman_filter)
 
 add_executable(imu_republisher_node nodes/imu_republisher_node.cpp)
 target_link_libraries(imu_republisher_node ${catkin_LIBRARIES})
+
+add_executable(plot_trajectory_node nodes/plot_trajectory_node.cpp)
+add_dependencies(plot_trajectory_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(plot_trajectory_node ${catkin_LIBRARIES} plot_trajectory)
