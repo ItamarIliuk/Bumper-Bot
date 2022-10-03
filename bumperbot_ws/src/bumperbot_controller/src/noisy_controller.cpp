@@ -1,6 +1,7 @@
 #include "bumperbot_controller/noisy_controller.h"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
+#include <random>
 
 
 NoisyController::NoisyController(const ros::NodeHandle &nh,
@@ -22,7 +23,7 @@ NoisyController::NoisyController(const ros::NodeHandle &nh,
 
     // Fill the Odometry message with invariant parameters
     odom_msg_.header.frame_id = "odom";
-    odom_msg_.child_frame_id = "base_footprint_eks";
+    odom_msg_.child_frame_id = "base_footprint_ekf";
     odom_msg_.twist.twist.linear.y = 0.0;
     odom_msg_.twist.twist.linear.z = 0.0;
     odom_msg_.twist.twist.angular.x = 0.0;
@@ -46,13 +47,22 @@ void NoisyController::jointCallback(const sensor_msgs::JointState &state)
     // Given the position of the wheels, calculates their velocities
     // then calculates the velocity of the robot wrt the robot frame
     // and then converts it in the global frame and publishes the TF
-    double dp_left = state.position.at(0) - left_wheel_prev_pos_;
-    double dp_right = state.position.at(1) - right_wheel_prev_pos_;
+    
+    // Add noise to wheel readings
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine noise_generator(seed);
+    std::normal_distribution<double> left_encoder_noise(0.0, 0.005);
+    std::normal_distribution<double> right_encoder_noise(0.0, 0.005);
+    double wheel_encoder_left = state.position.at(0) + left_encoder_noise(noise_generator);
+    double wheel_encoder_right = state.position.at(1) + right_encoder_noise(noise_generator);
+    
+    double dp_left = wheel_encoder_left - left_wheel_prev_pos_;
+    double dp_right = wheel_encoder_right - right_wheel_prev_pos_;
     double dt = (state.header.stamp - prev_time_).toSec();
 
     // Actualize the prev pose for the next itheration
-    left_wheel_prev_pos_ = state.position.at(0);
-    right_wheel_prev_pos_ = state.position.at(1);
+    left_wheel_prev_pos_ = wheel_encoder_left;
+    right_wheel_prev_pos_ = wheel_encoder_right;
     prev_time_ = state.header.stamp;
 
     // Calculate the rotational speed of each wheel

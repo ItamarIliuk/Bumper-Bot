@@ -25,19 +25,15 @@ private:
     ros::NodeHandle nh_;
     ros::Subscriber odom_sub_;
     ros::Subscriber imu_sub_;
+    ros::Publisher odom_pub_;
     double mean_;
     double variance_;
     double motion_variance_;
     double measurement_variance_;
     double motion_;
-    ros::Time last_imu_ts_;
-    ros::Time last_odom_ts_;
-    double imu_theta_;
-    bool is_first_imu_;
     bool is_first_odom_;
-    double last_yaw_;
-    double x_;
-    double y_;
-    geometry_msgs::TransformStamped transform_stamped_;
+    double last_angular_z_;
+    double imu_angular_z_;
+    nav_msgs::Odometry kalman_odom_;
 };
 

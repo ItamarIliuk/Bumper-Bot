@@ -6,6 +6,7 @@ from geometry_msgs.msg import TransformStamped
 import tf_conversions
 from tf2_ros import TransformBroadcaster
 import math
+import numpy as np
 
 
 class NoisyController(object):
@@ -51,13 +52,18 @@ class NoisyController(object):
         # Given the position of the wheels, calculates their velocities
         # then calculates the velocity of the robot wrt the robot frame
         # and then converts it in the global frame and publishes the TF
-        dp_left = msg.position[0] - self.left_wheel_prev_pos_
-        dp_right = msg.position[1] - self.right_wheel_prev_pos_
+
+        # Add noise to wheel readings
+        wheel_encoder_left = msg.position[0] + np.random.normal(0, 0.005)
+        wheel_encoder_right = msg.position[1] + np.random.normal(0, 0.005)
+
+        dp_left = wheel_encoder_left - self.left_wheel_prev_pos_
+        dp_right = wheel_encoder_right - self.right_wheel_prev_pos_
         dt = (msg.header.stamp - self.prev_time_).to_sec()
 
         # Actualize the prev pose for the next itheration
-        self.left_wheel_prev_pos_ = msg.position[0]
-        self.right_wheel_prev_pos_ = msg.position[1]
+        self.left_wheel_prev_pos_ = wheel_encoder_left
+        self.right_wheel_prev_pos_ = wheel_encoder_right
         self.prev_time_ = msg.header.stamp
 
         # Calculate the rotational speed of each wheel
