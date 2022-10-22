@@ -88,8 +88,8 @@
         <frameName>imu_link</frameName>
         <topicName>imu</topicName>
         <serviceName>imu_service</serviceName>
-        <gaussianNoise>0.05</gaussianNoise>
-        <updateRate>100</updateRate>
+        <gaussianNoise>0.001</gaussianNoise>
+        <updateRate>1000</updateRate>
       </plugin>
     </gazebo>
     

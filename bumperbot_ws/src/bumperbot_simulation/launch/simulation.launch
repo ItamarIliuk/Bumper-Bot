@@ -1,0 +1,11 @@
+<launch>
+    <arg name="model" default="$(find bumperbot_description)/urdf/bumperbot.urdf.xacro"/>
+    <arg name="world" default="empty_world"/>
+  
+  
+    <include file="$(find bumperbot_description)/launch/gazebo.launch">
+      <arg name="model" value="$(arg model)"/>
+      <arg name="world" value="$(find bumperbot_simulation)/worlds/$(arg world).world"/>
+    </include>
+  
+  </launch>

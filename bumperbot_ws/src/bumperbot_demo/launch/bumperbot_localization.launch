@@ -1,0 +1,25 @@
+<launch>
+    <!-- Launnch the Gazebo Simulation -->
+    <include file="$(find bumperbot_simulation)/launch/simulation.launch">
+        <arg name="world"   value="willow_garage"/>
+    </include>
+
+    <!-- Launch the Controller -->
+    <include file="$(find bumperbot_controller)/launch/controller.launch">
+        <arg name="is_simple"   value="false"/>
+    </include>
+
+    <!-- Launch the Joystick Teleop -->
+    <include file="$(find bumperbot_controller)/launch/joystick_teleop.launch"/>
+
+    <!-- Launch the map_server -->
+    <node pkg="map_server" name="map_server" type="map_server" 
+          args="$(find bumperbot_mapping)/maps/map.yaml"/>
+
+    <!-- Launch AMCL -->
+    <include file="$(find bumperbot_localization)/launch/amcl.launch"/>
+
+    <!-- Launch Rviz -->
+    <node pkg="rviz" name="rviz" type="rviz" args="-d $(find bumperbot_localization)/rviz/amcl.rviz"/>
+
+</launch>
