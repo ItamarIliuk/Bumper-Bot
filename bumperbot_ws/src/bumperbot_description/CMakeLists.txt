@@ -1,14 +1,18 @@
-cmake_minimum_required(VERSION 2.8.3)
-
+cmake_minimum_required(VERSION 3.5)
 project(bumperbot_description)
 
-find_package(catkin REQUIRED)
 
-catkin_package()
+find_package(ament_cmake REQUIRED)
+find_package(urdf REQUIRED)
 
-find_package(roslaunch)
+install(
+  DIRECTORY launch meshes urdf rviz
+  DESTINATION share/${PROJECT_NAME}
+)
 
-foreach(dir config launch meshes urdf)
-	install(DIRECTORY ${dir}/
-		DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
-endforeach(dir)
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()

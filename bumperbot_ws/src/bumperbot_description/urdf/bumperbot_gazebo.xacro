@@ -6,29 +6,24 @@
       <material>Gazebo/DarkGrey</material>
     </gazebo>
     
-    <!-- Wheels -->
+    <!-- Move this one to ros2 control -->
     <transmission name="wheel_right_transmission">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="wheel_right_joint" >
-        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <plugin>transmission_interface/SimpleTransmission</plugin>
+      <actuator name="wheel_right_motor" role="actuator_right"/>
+      <joint name="wheel_right_joint"    role="joint_right">
+        <mechanical_reduction>1.0</mechanical_reduction>
       </joint>
-      <actuator name="wheel_right_motor" >
-        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-        <mechanicalReduction>1.0</mechanicalReduction>
-      </actuator>
-    </transmission>
-    
-    <transmission name="wheel_left_transmission">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="wheel_left_joint" >
-        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-      </joint>
-      <actuator name="wheel_left_motor" >
-        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-        <mechanicalReduction>1.0</mechanicalReduction>
-      </actuator>
     </transmission>
 
+    <transmission name="wheel_left_transmission">
+      <plugin>transmission_interface/SimpleTransmission</plugin>
+      <actuator name="wheel_left_motor" role="actuator_left"/>
+      <joint name="wheel_left_joint"    role="joint_left">
+        <mechanical_reduction>1.0</mechanical_reduction>
+      </joint>
+    </transmission>
+
+    <!-- Wheels -->
     <gazebo reference="wheel_left_link">
       <mu1>1000000000000000.0</mu1>
       <mu2>1000000000000000.0</mu2>
@@ -74,9 +69,10 @@
     
     <!-- ROS Control -->
     <gazebo>
-      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-        <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
-        <legacyModeNS>true</legacyModeNS>
+      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+        <robot_param>robot_description</robot_param>
+        <robot_param_node>robot_state_publisher</robot_param_node>
+        <parameters>$(find bumperbot_controller)/config/bumperbot_controllers.yaml</parameters>
       </plugin>
     </gazebo>
 
@@ -91,40 +87,6 @@
         <gaussianNoise>0.001</gaussianNoise>
         <updateRate>1000</updateRate>
       </plugin>
-    </gazebo>
-    
-    <!-- Laser Scanner -->
-    <gazebo reference="laser_link">
-      <material>Gazebo/FlatBlack</material>
-      <sensor type="ray" name="lds_lfcd_sensor">
-        <pose>0 0 0 0 0 0</pose>
-        <visualize>true</visualize>
-        <update_rate>5</update_rate>
-        <ray>
-          <scan>
-            <horizontal>
-              <samples>360</samples>
-              <resolution>1</resolution>
-              <min_angle>0.0</min_angle>
-              <max_angle>6.28319</max_angle>
-            </horizontal>
-          </scan>
-          <range>
-            <min>0.120</min>
-            <max>12</max>
-            <resolution>0.015</resolution>
-          </range>
-          <noise>
-            <type>gaussian</type>
-            <mean>0.0</mean>
-            <stddev>0.01</stddev>
-          </noise>
-        </ray>
-        <plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_laser.so">
-          <topicName>scan</topicName>
-          <frameName>laser_link</frameName>
-        </plugin>
-      </sensor>
     </gazebo>
 
 </robot>
