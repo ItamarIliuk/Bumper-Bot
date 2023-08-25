@@ -1,4 +1,0 @@
-<launch>
-    <node pkg="bumperbot_template" name="bumperbot_template" type="bumperbot_node"
-          respawn="true" output="screen"/>
-</launch>

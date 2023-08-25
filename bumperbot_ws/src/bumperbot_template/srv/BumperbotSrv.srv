@@ -1,6 +1,0 @@
-# Service Request
-int32 a
-int32 b
----
-# Service Response
-int32 sum
