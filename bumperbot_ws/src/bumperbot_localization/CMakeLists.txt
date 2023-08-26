@@ -34,6 +34,11 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(
+  DIRECTORY launch config
+  DESTINATION share/${PROJECT_NAME}
+)
+
 install(PROGRAMS
   ${PROJECT_NAME}/kalman_filter.py
   ${PROJECT_NAME}/imu_republisher.py
