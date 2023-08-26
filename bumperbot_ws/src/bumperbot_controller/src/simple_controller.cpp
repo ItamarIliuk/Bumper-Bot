@@ -66,7 +66,8 @@ void SimpleController::jointCallback(const sensor_msgs::msg::JointState &state)
     // and then converts it in the global frame and publishes the TF
     double dp_left = state.position.at(1) - left_wheel_prev_pos_;
     double dp_right = state.position.at(0) - right_wheel_prev_pos_;
-    double dt = state.header.stamp.sec - prev_time_.seconds();
+    rclcpp::Time msg_time = state.header.stamp;
+    rclcpp::Duration dt = msg_time - prev_time_;
 
     // Actualize the prev pose for the next itheration
     left_wheel_prev_pos_ = state.position.at(1);
@@ -74,8 +75,8 @@ void SimpleController::jointCallback(const sensor_msgs::msg::JointState &state)
     prev_time_ = state.header.stamp;
 
     // Calculate the rotational speed of each wheel
-    double fi_left = dp_left / dt;
-    double fi_right = dp_right / dt;
+    double fi_left = dp_left / dt.seconds();
+    double fi_right = dp_right / dt.seconds();
 
     // Calculate the linear and angular velocity
     double linear = (wheel_radius_ * fi_right + wheel_radius_ * fi_left) / 2;

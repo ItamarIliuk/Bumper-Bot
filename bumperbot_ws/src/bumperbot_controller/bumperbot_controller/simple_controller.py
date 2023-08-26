@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
+from rclpy.constants import S_TO_NS
 from rclpy.time import Time
 from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import TwistStamped
@@ -79,7 +80,7 @@ class SimpleController(Node):
         # and then converts it in the global frame and publishes the TF
         dp_left = msg.position[1] - self.left_wheel_prev_pos_
         dp_right = msg.position[0] - self.right_wheel_prev_pos_
-        dt = Time.from_msg(msg.header.stamp).nanoseconds - self.prev_time_.nanoseconds
+        dt = Time.from_msg(msg.header.stamp) - self.prev_time_
 
         # Actualize the prev pose for the next itheration
         self.left_wheel_prev_pos_ = msg.position[1]
@@ -87,8 +88,8 @@ class SimpleController(Node):
         self.prev_time_ = Time.from_msg(msg.header.stamp)
 
         # Calculate the rotational speed of each wheel
-        fi_left = dp_left / dt
-        fi_right = dp_right / dt
+        fi_left = dp_left / (dt.nanoseconds / S_TO_NS)
+        fi_right = dp_right / (dt.nanoseconds / S_TO_NS)
 
         # Calculate the linear and angular velocity
         linear = (self.wheel_radius_ * fi_right + self.wheel_radius_ * fi_left) / 2

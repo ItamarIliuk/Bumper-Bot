@@ -2,6 +2,7 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.time import Time
+from rclpy.constants import S_TO_NS
 from sensor_msgs.msg import JointState
 from nav_msgs.msg import Odometry
 import numpy as np
@@ -67,7 +68,7 @@ class NoisyController(Node):
 
         dp_left = wheel_encoder_left - self.left_wheel_prev_pos_
         dp_right = wheel_encoder_right - self.right_wheel_prev_pos_
-        dt = Time.from_msg(msg.header.stamp).nanoseconds - self.prev_time_.nanoseconds
+        dt = Time.from_msg(msg.header.stamp) - self.prev_time_
 
         # Actualize the prev pose for the next itheration
         self.left_wheel_prev_pos_ = msg.position[1]
@@ -75,8 +76,8 @@ class NoisyController(Node):
         self.prev_time_ = Time.from_msg(msg.header.stamp)
 
         # Calculate the rotational speed of each wheel
-        fi_left = dp_left / dt
-        fi_right = dp_right / dt
+        fi_left = dp_left / (dt.nanoseconds / S_TO_NS)
+        fi_right = dp_right / (dt.nanoseconds / S_TO_NS)
 
         # Calculate the linear and angular velocity
         linear = (self.wheel_radius_ * fi_right + self.wheel_radius_ * fi_left) / 2
