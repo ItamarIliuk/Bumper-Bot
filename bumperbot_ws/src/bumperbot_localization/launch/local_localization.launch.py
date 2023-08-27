@@ -1,9 +1,19 @@
 from launch import LaunchDescription
 from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+from launch.conditions import UnlessCondition, IfCondition
 import os
 
 def generate_launch_description():
+
+    use_python_arg = DeclareLaunchArgument(
+        "use_python",
+        default_value="False",
+    )
+
+    use_python = LaunchConfiguration("use_python")
 
     static_transform_publisher = Node(
         package="tf2_ros",
@@ -14,9 +24,16 @@ def generate_launch_description():
                    "--child-frame-id", "imu_link_ekf"],
     )
 
-    imu_republisher = Node(
+    imu_republisher_py = Node(
+        package="bumperbot_localization",
+        executable="imu_republisher.py",
+        condition=IfCondition(use_python),
+    )
+
+    imu_republisher_cpp = Node(
         package="bumperbot_localization",
         executable="imu_republisher",
+        condition=UnlessCondition(use_python),
     )
 
     robot_localization = Node(
@@ -28,7 +45,9 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        use_python_arg,
         static_transform_publisher,
-        imu_republisher,   
+        imu_republisher_py,
+        imu_republisher_cpp,   
         robot_localization,
     ])
