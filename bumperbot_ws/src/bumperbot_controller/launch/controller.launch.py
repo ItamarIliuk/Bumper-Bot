@@ -9,6 +9,7 @@ from ament_index_python.packages import get_package_share_directory
 
 
 def noisy_controller(context, *args, **kwargs):
+    use_python = LaunchConfiguration("use_python")
     wheel_radius = float(LaunchConfiguration("wheel_radius").perform(context))
     wheel_separation = float(LaunchConfiguration("wheel_separation").perform(context))
     wheel_radius_error = float(LaunchConfiguration("wheel_radius_error").perform(context))
@@ -20,6 +21,7 @@ def noisy_controller(context, *args, **kwargs):
         parameters=[
             {"wheel_radius": wheel_radius + wheel_radius_error,
              "wheel_separation": wheel_separation + wheel_separation_error}],
+        condition=IfCondition(use_python),
     )
 
     noisy_controller_cpp = Node(
@@ -28,6 +30,7 @@ def noisy_controller(context, *args, **kwargs):
         parameters=[
             {"wheel_radius": wheel_radius + wheel_radius_error,
              "wheel_separation": wheel_separation + wheel_separation_error}],
+        condition=UnlessCondition(use_python),
     )
 
     return [

@@ -24,6 +24,14 @@ def generate_launch_description():
                    "--child-frame-id", "imu_link_ekf"],
     )
 
+    robot_localization = Node(
+        package="robot_localization",
+        executable="ekf_node",
+        name="ekf_filter_node",
+        output="screen",
+        parameters=[os.path.join(get_package_share_directory("bumperbot_localization"), "config", "ekf.yaml")],
+    )
+
     imu_republisher_py = Node(
         package="bumperbot_localization",
         executable="imu_republisher.py",
@@ -36,18 +44,10 @@ def generate_launch_description():
         condition=UnlessCondition(use_python),
     )
 
-    robot_localization = Node(
-        package="robot_localization",
-        executable="ekf_node",
-        name="ekf_filter_node",
-        output="screen",
-        parameters=[os.path.join(get_package_share_directory("bumperbot_localization"), "config", "ekf.yaml")],
-    )
-
     return LaunchDescription([
         use_python_arg,
         static_transform_publisher,
+        robot_localization,
         imu_republisher_py,
         imu_republisher_cpp,   
-        robot_localization,
     ])
