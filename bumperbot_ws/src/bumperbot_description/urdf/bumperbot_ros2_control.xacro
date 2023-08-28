@@ -3,8 +3,6 @@
 
     <ros2_control name="RobotSystem" type="system">
 
-        <xacro:property name="PI" value="3.14159265359" />
-
         <!-- ros2_control Gazebo -->
         <xacro:if value="$(arg is_sim)">
             <hardware>
