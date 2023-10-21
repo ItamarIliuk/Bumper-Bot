@@ -2,9 +2,6 @@
 
 <robot name="bumperbot" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- Load Simulated or Real Hardware Interfaces -->
-  <xacro:arg name="is_sim" default="true"/>
-
   <!-- Include Gazebo Parameters -->
   <xacro:include filename="$(find bumperbot_description)/urdf/bumperbot_gazebo.xacro" />
 
@@ -26,9 +23,6 @@
       <geometry>
         <mesh filename="package://bumperbot_description/meshes/base_link.STL" />
       </geometry>
-      <material name="">
-        <color rgba="0.258823529411765 0.27843137254902 0.301960784313725 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -57,9 +51,6 @@
       <geometry>
         <mesh filename="package://bumperbot_description/meshes/wheel_right_link.STL" />
       </geometry>
-      <material name="">
-        <color rgba="0.831372549019608 0.670588235294118 0.129411764705882 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 -0.015 0" rpy="1.57 0 0" />
@@ -90,9 +81,6 @@
       <geometry>
         <mesh filename="package://bumperbot_description/meshes/wheel_left_link.STL" />
       </geometry>
-      <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0.015 0" rpy="-1.57 0 0" />
@@ -122,9 +110,6 @@
       <geometry>
         <mesh filename="package://bumperbot_description/meshes/caster_front_link.STL" />
       </geometry>
-      <material name="">
-        <color rgba="1 0 0 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -154,9 +139,6 @@
       <geometry>
         <mesh filename="package://bumperbot_description/meshes/caster_rear_link.STL" />
       </geometry>
-      <material name="">
-        <color rgba="0.258823529411765 0.27843137254902 0.301960784313725 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -170,70 +152,6 @@
     <origin xyz="-0.04755 0 -0.0275" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="caster_rear_link" />
-    <axis xyz="0 0 0" />
-  </joint>
-
-  <link name="camera_link">
-    <inertial>
-      <origin xyz="-0.0122943599302166 -9.05173297049283E-07 0.00843684900384606" rpy="0 0 0" />
-      <mass value="0.0041086489783227" />
-      <inertia ixx="3.98797447678453E-07" ixy="-8.24558929781979E-11" ixz="1.22069699665359E-07"
-               iyy="4.18205575812023E-07" iyz="-1.01562924198144E-10"
-               izz="4.28578734986182E-07" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://bumperbot_description/meshes/camera_link.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://bumperbot_description/meshes/camera_link.STL" />
-      </geometry>
-    </collision>
-  </link>
-
-  <joint name="camera_joint" type="fixed">
-    <origin xyz="0.081561 0 0.067457" rpy="0 -0.23739 0" />
-    <parent link="base_link" />
-    <child link="camera_link" />
-    <axis xyz="0 0 0" />
-  </joint>
-
-  <link name="laser_link">
-    <inertial>
-      <origin xyz="-0.011945780406062 -0.000381929217680526 -0.0170649378129477" rpy="0 0 0" />
-      <mass value="0.073084435549317" />
-      <inertia ixx="1.96074931730795E-05" ixy="-3.62091076640009E-07" ixz="4.28230084046735E-07"
-               iyy="2.40983835136327E-05" iyz="1.50180909250652E-08"
-               izz="4.14184164228595E-05" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://bumperbot_description/meshes/laser_link.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://bumperbot_description/meshes/laser_link.STL" />
-      </geometry>
-    </collision>
-  </link>
-
-  <joint name="laser_joint" type="fixed">
-    <origin xyz="-0.0050526 -0.0023221 0.1208" rpy="0 0 0" />
-    <parent link="base_link" />
-    <child link="laser_link" />
     <axis xyz="0 0 0" />
   </joint>
 
