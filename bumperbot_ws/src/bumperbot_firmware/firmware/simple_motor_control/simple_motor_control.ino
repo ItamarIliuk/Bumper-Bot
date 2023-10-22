@@ -1,26 +1,35 @@
-#define enA 9
-#define in1 6
+#define L298N_enA 9  // PWM
+#define L298N_enB 11 // PWM
+#define L298N_in1 8
+#define L298N_in2 7
+#define L298N_in3 13
+#define L298N_in4 12
 
+int cmd = 0;
 
 void setup() {
-  // Initialize motor pins
-  pinMode(enA, OUTPUT);
-  pinMode(in1, OUTPUT);
+  // Set pin modes
+  pinMode(L298N_enA, OUTPUT);
+  pinMode(L298N_enB, OUTPUT);
+  pinMode(L298N_in1, OUTPUT);
+  pinMode(L298N_in2, OUTPUT);
+  pinMode(L298N_in3, OUTPUT);
+  pinMode(L298N_in4, OUTPUT);
 
   // Set initial rotation direction
-  digitalWrite(in1, HIGH);
+  digitalWrite(L298N_in1, HIGH);
+  digitalWrite(L298N_in2, LOW);
+  digitalWrite(L298N_in3, HIGH);
+  digitalWrite(L298N_in4, LOW);
 
-  // Start the Serial communication with ROS 2
   Serial.begin(115200);
   Serial.setTimeout(1);
 }
 
 void loop() {
-  // Check for new messages
   if (Serial.available())
   {
-    int vel = Serial.readString().toInt();
-    analogWrite(enA, vel); // Send PWM signal to L298N Enable pin
+    cmd = Serial.readString().toInt();
   }
-  delay(0.1);
+  analogWrite(L298N_enA, cmd);
 }

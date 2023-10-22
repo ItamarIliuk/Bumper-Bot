@@ -133,7 +133,13 @@ CallbackReturn BumperbotInterface::on_deactivate(const rclcpp_lifecycle::State &
 hardware_interface::return_type BumperbotInterface::read(const rclcpp::Time &,
                                                           const rclcpp::Duration &)
 {
-  // TODO: read from encoders
+  if(arduino_.IsDataAvailable())
+  {
+    std::string message;
+    arduino_.ReadLine(message);
+
+    // TODO: Interpret the string
+  }
   return hardware_interface::return_type::OK;
 }
 
@@ -141,24 +147,22 @@ hardware_interface::return_type BumperbotInterface::write(const rclcpp::Time &,
                                                            const rclcpp::Duration &)
 {
   // Implement communication protocol with the Arduino
-  std::string msg;
-  msg.append("r");
-  msg.append(std::to_string(velocity_commands_.at(0)));
-  msg.append(",");
-  msg.append("l");
-  msg.append(std::to_string(velocity_commands_.at(1)));
-  msg.append(",");
+  std::stringstream message_stream;
+  message_stream << std::fixed << std::setprecision(2) <<
+  "r" << velocity_commands_.at(0) << 
+  ",l" << velocity_commands_.at(1) << ",";
 
   try
   {
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("BumperbotInterface"), "Sending new command " << msg);
-    arduino_.Write(msg);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("BumperbotInterface"), 
+      "Sending new command " << message_stream.str());
+    arduino_.Write(message_stream.str());
   }
   catch (...)
   {
     RCLCPP_ERROR_STREAM(rclcpp::get_logger("BumperbotInterface"),
                         "Something went wrong while sending the message "
-                            << msg << " to the port " << port_);
+                            << message_stream.str() << " to the port " << port_);
     return hardware_interface::return_type::ERROR;
   }
 
