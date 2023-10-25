@@ -47,6 +47,7 @@ CallbackReturn BumperbotInterface::on_init(const hardware_interface::HardwareInf
 
   velocity_commands_.reserve(info_.joints.size());
   position_states_.reserve(info_.joints.size());
+  velocity_states_.reserve(info_.joints.size());
 
   return CallbackReturn::SUCCESS;
 }
@@ -61,6 +62,8 @@ std::vector<hardware_interface::StateInterface> BumperbotInterface::export_state
   {
     state_interfaces.emplace_back(hardware_interface::StateInterface(
         info_.joints[i].name, hardware_interface::HW_IF_POSITION, &position_states_[i]));
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &velocity_states_[i]));
   }
 
   return state_interfaces;
@@ -87,8 +90,9 @@ CallbackReturn BumperbotInterface::on_activate(const rclcpp_lifecycle::State &)
   RCLCPP_INFO(rclcpp::get_logger("BumperbotInterface"), "Starting robot hardware ...");
 
   // Reset commands and states
-  velocity_commands_ = { 0.0, 0.0, 0.0, 0.0 };
-  position_states_ = { 0.0, 0.0, 0.0, 0.0 };
+  velocity_commands_ = { 0.0, 0.0 };
+  position_states_ = { 0.0, 0.0 };
+  velocity_states_ = { 0.0, 0.0 };
 
   try
   {
@@ -133,18 +137,17 @@ CallbackReturn BumperbotInterface::on_deactivate(const rclcpp_lifecycle::State &
 hardware_interface::return_type BumperbotInterface::read(const rclcpp::Time &,
                                                           const rclcpp::Duration &)
 {
-  if(arduino_.IsDataAvailable())
-  {
-    std::string message;
-    arduino_.ReadLine(message);
-
-    // TODO: Interpret the string
-  }
+  // TODO: Interpret the string
+  // if(arduino_.IsDataAvailable())
+  // {
+  //   std::string message;
+  //   arduino_.ReadLine(message);
+  // }
   return hardware_interface::return_type::OK;
 }
 
 hardware_interface::return_type BumperbotInterface::write(const rclcpp::Time &,
-                                                           const rclcpp::Duration &)
+                                                          const rclcpp::Duration &)
 {
   // Implement communication protocol with the Arduino
   std::stringstream message_stream;
