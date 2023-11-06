@@ -1,29 +1,32 @@
-#define L298N_enA 9  // PWM
-#define L298N_enB 11 // PWM
-#define L298N_in1 8
-#define L298N_in2 7
-#define L298N_in3 13
-#define L298N_in4 12
+// L298N H-Bridge Connection PINs
+#define L298N_enA 25  // PWM
+#define L298N_in2 33
+#define L298N_in1 32
+
+// Setting PWM properties
+const int freq = 30000;
+const int ch_A = 0;
+const int resolution = 8;
 
 int cmd = 0;
 
 void setup() {
   // Set pin modes
   pinMode(L298N_enA, OUTPUT);
-  pinMode(L298N_enB, OUTPUT);
   pinMode(L298N_in1, OUTPUT);
   pinMode(L298N_in2, OUTPUT);
-  pinMode(L298N_in3, OUTPUT);
-  pinMode(L298N_in4, OUTPUT);
+  
+  // configure LED PWM functionalitites
+  ledcSetup(ch_A, freq, resolution);
+  
+  // attach the channel to the GPIO to be controlled
+  ledcAttachPin(L298N_enA, ch_A);
 
-  // Set initial rotation direction
+  // Set Rotation Direction
   digitalWrite(L298N_in1, HIGH);
   digitalWrite(L298N_in2, LOW);
-  digitalWrite(L298N_in3, HIGH);
-  digitalWrite(L298N_in4, LOW);
 
   Serial.begin(115200);
-  Serial.setTimeout(1);
 }
 
 void loop() {
@@ -31,5 +34,5 @@ void loop() {
   {
     cmd = Serial.readString().toInt();
   }
-  analogWrite(L298N_enA, cmd);
+  ledcWrite(ch_A, cmd);
 }
