@@ -216,8 +216,6 @@ hardware_interface::return_type BumperbotInterface::write(const rclcpp::Time &,
 
   try
   {
-    // RCLCPP_INFO_STREAM(rclcpp::get_logger("BumperbotInterface"), 
-    //   "Sending new command " << message_stream.str());
     arduino_.Write(message_stream.str());
   }
   catch (...)
