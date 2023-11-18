@@ -50,8 +50,8 @@ bumperbot_controller:
     linear:
       x:
         has_velocity_limits    : true
-        max_velocity           : 0.29  # m/s
-        min_velocity           : -0.29 # m/s
+        max_velocity           : 0.7  # m/s
+        min_velocity           : -0.7 # m/s
         has_acceleration_limits: true
         max_acceleration       : 0.6  # m/s^2
         min_acceleration       : -0.4 # m/s^2
@@ -60,8 +60,8 @@ bumperbot_controller:
     angular:
       z:
         has_velocity_limits    : true
-        max_velocity           : 3.4  # rad/s
-        min_velocity           : -3.4  # rad/s
+        max_velocity           : 8.5  # rad/s
+        min_velocity           : -8.5  # rad/s
         has_acceleration_limits: true
         max_acceleration       : 1.5  # rad/s^2
         has_jerk_limits        : false
