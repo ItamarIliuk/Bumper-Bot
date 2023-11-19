@@ -17,6 +17,8 @@
 // Encoders
 unsigned int right_encoder_counter = 0;
 unsigned int left_encoder_counter = 0;
+String right_wheel_sign = "p";  // 'p' = positive, 'n' = negative
+String left_wheel_sign = "p";  // 'p' = positive, 'n' = negative
 unsigned long last_millis = 0;
 const unsigned long interval = 100;
 
@@ -69,6 +71,9 @@ void setup() {
   leftMotor.SetMode(AUTOMATIC);
   Serial.begin(115200);
 
+  // Init encoders
+  pinMode(right_encoder_phaseB, INPUT);
+  pinMode(left_encoder_phaseB, INPUT);
   // Set Callback for Wheel Encoders Pulse
   attachInterrupt(digitalPinToInterrupt(right_encoder_phaseA), rightEncoderCallback, RISING);
   attachInterrupt(digitalPinToInterrupt(left_encoder_phaseA), leftEncoderCallback, RISING);
@@ -182,7 +187,7 @@ void loop() {
       left_wheel_cmd = 0.0;
     }
 
-    String encoder_read = "r" + String(right_wheel_cmd) + ",l" + String(left_wheel_cmd) + ",";
+    String encoder_read = "r" + right_wheel_sign + String(right_wheel_meas_vel) + ",l" + left_wheel_sign + String(left_wheel_meas_vel) + ",";
     Serial.println(encoder_read);
     last_millis = current_millis;
     right_encoder_counter = 0;
@@ -196,11 +201,27 @@ void loop() {
 // New pulse from Right Wheel Encoder
 void rightEncoderCallback()
 {
+  if(digitalRead(right_encoder_phaseB) == HIGH)
+  {
+    right_wheel_sign = "p";
+  }
+  else
+  {
+    right_wheel_sign = "n";
+  }
   right_encoder_counter++;
 }
 
 // New pulse from Left Wheel Encoder
 void leftEncoderCallback()
 {
+  if(digitalRead(left_encoder_phaseB) == HIGH)
+  {
+    left_wheel_sign = "n";
+  }
+  else
+  {
+    left_wheel_sign = "p";
+  }
   left_encoder_counter++;
 }

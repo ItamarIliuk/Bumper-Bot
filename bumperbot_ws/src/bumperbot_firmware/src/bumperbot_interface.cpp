@@ -144,15 +144,18 @@ hardware_interface::return_type BumperbotInterface::read(const rclcpp::Time &,
     arduino_.ReadLine(message);
     std::stringstream ss(message);
     std::string res;
+    int multiplier = 1;
     while(std::getline(ss, res, ','))
     {
+      multiplier = res.at(1) == 'p' ? 1 : -1;
+
       if(res.at(0) == 'r')
       {
-        velocity_states_.at(0) = std::stod(res.substr(1, res.size()));
+        velocity_states_.at(0) = multiplier * std::stod(res.substr(2, res.size()));
       }
       else if(res.at(0) == 'l')
       {
-        velocity_states_.at(1) = std::stod(res.substr(1, res.size()));
+        velocity_states_.at(1) = multiplier * std::stod(res.substr(2, res.size()));
       }
     }
     RCLCPP_INFO_STREAM(rclcpp::get_logger("BumperbotInterface"), "Received message: " << message);
@@ -170,7 +173,7 @@ hardware_interface::return_type BumperbotInterface::write(const rclcpp::Time &,
   char left_wheel_sign = velocity_commands_.at(1) >= 0 ? 'p' : 'n';
   std::string compensate_zeros_right = "";
   std::string compensate_zeros_left = "";
-  if(velocity_commands_.at(0) < 10.0)
+  if(std::abs(velocity_commands_.at(0)) < 10.0)
   {
     compensate_zeros_right = "0";
   }
@@ -178,7 +181,7 @@ hardware_interface::return_type BumperbotInterface::write(const rclcpp::Time &,
   {
     compensate_zeros_right = "";
   }
-  if(velocity_commands_.at(1) < 10.0)
+  if(std::abs(velocity_commands_.at(1)) < 10.0)
   {
     compensate_zeros_left = "0";
   }
