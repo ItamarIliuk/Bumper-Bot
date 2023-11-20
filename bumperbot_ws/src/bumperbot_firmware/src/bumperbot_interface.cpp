@@ -158,7 +158,6 @@ hardware_interface::return_type BumperbotInterface::read(const rclcpp::Time &,
         velocity_states_.at(1) = multiplier * std::stod(res.substr(2, res.size()));
       }
     }
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("BumperbotInterface"), "Received message: " << message);
   }
   return hardware_interface::return_type::OK;
 }
@@ -196,7 +195,6 @@ hardware_interface::return_type BumperbotInterface::write(const rclcpp::Time &,
 
   try
   {
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("BumperbotInterface"), "Sending message: " << message_stream.str());
     arduino_.Write(message_stream.str());
   }
   catch (...)

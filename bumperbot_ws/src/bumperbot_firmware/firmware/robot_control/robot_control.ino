@@ -178,11 +178,11 @@ void loop() {
     leftMotor.Compute();
 
     // Ignore commands smaller than inertia
-    if(right_wheel_cmd <= 60.0 && right_wheel_cmd_vel == 0.0)
+    if(right_wheel_cmd_vel == 0.0)
     {
       right_wheel_cmd = 0.0;
     }
-    if(left_wheel_cmd <= 60.0 && left_wheel_cmd_vel == 0.0)
+    if(left_wheel_cmd_vel == 0.0)
     {
       left_wheel_cmd = 0.0;
     }
