@@ -6,6 +6,27 @@
 
 using std::placeholders::_1;
 
+double normalize(double z)
+{
+  return atan2(sin(z), cos(z));
+}
+
+double angle_diff(double a, double b)
+{
+  a = normalize(a);
+  b = normalize(b);
+  double d1 = a - b;
+  double d2 = 2 * M_PI - fabs(d1);
+  if (d1 > 0) {
+    d2 *= -1.0;
+  }
+  if (fabs(d1) < fabs(d2)) {
+    return d1;
+  } else {
+    return d2;
+  }
+}
+
 OdometryMotionModel::OdometryMotionModel(const std::string &name)
     : Node(name)
     , alpha1_(0.0)
@@ -66,14 +87,23 @@ void OdometryMotionModel::odomCallback(const nav_msgs::msg::Odometry &odom)
 	// (Probabilistic Robotics)
     double odom_x_increment = odom.pose.pose.position.x - last_odom_x_;
     double odom_y_increment = odom.pose.pose.position.y - last_odom_y_;
-    double odom_theta_increment = yaw - last_odom_theta_;
 
+    // Calculate minumin angular distance
+    double odom_theta_increment = angle_diff(yaw, last_odom_theta_);
 
-    double delta_rot1 = (odom_y_increment != 0 || odom_x_increment != 0)
-		? (atan2(odom_y_increment, odom_x_increment) - yaw)
-		: 0.0;
-	double delta_trans = std::sqrt(std::pow(odom_x_increment, 2) + std::pow(odom_y_increment, 2));
-	double delta_rot2 = odom_theta_increment - delta_rot1;
+    double delta_rot1, delta_trans, delta_rot2;
+    if (sqrt(
+        std::pow(odom_y_increment, 2) +
+        std::pow(odom_x_increment, 2)) < 0.01)
+    {
+        delta_rot1 = 0.0;
+    } else {
+        delta_rot1 = angle_diff(
+        atan2(odom_y_increment, odom_x_increment),
+        yaw);
+    }
+	delta_trans = std::sqrt(std::pow(odom_x_increment, 2) + std::pow(odom_y_increment, 2));
+	delta_rot2 = angle_diff(odom_theta_increment, delta_rot1);
 
     double rot1_variance = alpha1_ * delta_rot1 + alpha2_ * delta_trans;
     double trans_variance = alpha3_ * delta_trans + alpha4_ * (delta_rot1 + delta_rot2);
@@ -87,19 +117,30 @@ void OdometryMotionModel::odomCallback(const nav_msgs::msg::Odometry &odom)
 
     for (auto & sample : samples_.poses)
     {
-        double delta_rot1_draw = delta_rot1 - rot1_noise(noise_generator);
+        double delta_rot1_draw = angle_diff(delta_rot1, rot1_noise(noise_generator));
         double delta_trans_draw = delta_trans - trans_noise(noise_generator);
-        double delta_rot2_draw = delta_rot2 - rot2_noise(noise_generator);
+        double delta_rot2_draw = angle_diff(delta_rot2, rot2_noise(noise_generator));
 
-        sample.position.x += delta_trans_draw * std::cos(yaw + delta_rot1_draw);
-        sample.position.y += delta_trans_draw * std::sin(yaw + delta_rot1_draw);
+        tf2::Quaternion sample_q(sample.orientation.x, sample.orientation.y,
+            sample.orientation.z, sample.orientation.w);
+        tf2::Matrix3x3 sample_m(sample_q);
+        double sample_roll, sample_pitch, sample_yaw;
+        sample_m.getRPY(sample_roll, sample_pitch, sample_yaw);
+        sample.position.x += delta_trans_draw * std::cos(sample_yaw + delta_rot1_draw);
+        sample.position.y += delta_trans_draw * std::sin(sample_yaw + delta_rot1_draw);
         tf2::Quaternion q;
-        q.setRPY(0.0, 0.0, yaw + delta_rot1_draw + delta_rot2_draw);
+        q.setRPY(0.0, 0.0, sample_yaw + delta_rot1_draw + delta_rot2_draw);
         sample.orientation.x = q.getX();
         sample.orientation.y = q.getY();
         sample.orientation.z = q.getZ();
         sample.orientation.w = q.getW();
     }
 
+    // Update for the next iteration
+    last_odom_x_ = odom.pose.pose.position.x;
+    last_odom_y_ = odom.pose.pose.position.y;
+    last_odom_theta_ = yaw;
+
+    // Publish samples
     pose_array_pub_->publish(samples_);
 }
