@@ -83,14 +83,14 @@ void OdometryMotionModel::odomCallback(const nav_msgs::msg::Odometry &odom)
         return;
     }
 
-	// The following is an implementation from Thrun et al.'s book
-	// (Probabilistic Robotics)
+	// The following is an implementation from Thrun et al.
+	// (Book: Probabilistic Robotics)
+    // Odometry Increment
     double odom_x_increment = odom.pose.pose.position.x - last_odom_x_;
     double odom_y_increment = odom.pose.pose.position.y - last_odom_y_;
-
-    // Calculate minumin angular distance
     double odom_theta_increment = angle_diff(yaw, last_odom_theta_);
 
+    // Motion Model
     double delta_rot1, delta_trans, delta_rot2;
     if (sqrt(
         std::pow(odom_y_increment, 2) +
@@ -105,6 +105,7 @@ void OdometryMotionModel::odomCallback(const nav_msgs::msg::Odometry &odom)
 	delta_trans = std::sqrt(std::pow(odom_x_increment, 2) + std::pow(odom_y_increment, 2));
 	delta_rot2 = angle_diff(odom_theta_increment, delta_rot1);
 
+    // Noise Model that affects the Motion Model
     double rot1_variance = alpha1_ * delta_rot1 + alpha2_ * delta_trans;
     double trans_variance = alpha3_ * delta_trans + alpha4_ * (delta_rot1 + delta_rot2);
     double rot2_variance = alpha1_ * delta_rot2 + alpha2_ * delta_trans;
