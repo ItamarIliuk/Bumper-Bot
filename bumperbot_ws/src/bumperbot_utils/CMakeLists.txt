@@ -14,12 +14,14 @@ find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(twist_mux_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
 
 add_executable(trajectory_drawer src/trajectory_drawer.cpp)
 ament_target_dependencies(trajectory_drawer rclcpp geometry_msgs nav_msgs)
 
 add_executable(safety_stop src/safety_stop.cpp)
-ament_target_dependencies(safety_stop rclcpp std_msgs sensor_msgs)
+ament_target_dependencies(safety_stop rclcpp std_msgs sensor_msgs geometry_msgs twist_mux_msgs rclcpp_action)
 
 ament_python_install_package(${PROJECT_NAME})
 
