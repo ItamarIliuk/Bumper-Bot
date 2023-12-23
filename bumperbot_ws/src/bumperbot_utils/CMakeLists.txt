@@ -12,14 +12,20 @@ find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 add_executable(trajectory_drawer src/trajectory_drawer.cpp)
 ament_target_dependencies(trajectory_drawer rclcpp geometry_msgs nav_msgs)
+
+add_executable(safety_stop src/safety_stop.cpp)
+ament_target_dependencies(safety_stop rclcpp std_msgs sensor_msgs)
 
 ament_python_install_package(${PROJECT_NAME})
 
 install(TARGETS
   trajectory_drawer
+  safety_stop
   DESTINATION lib/${PROJECT_NAME}
 )
 
