@@ -34,7 +34,7 @@ class SimpleController(Node):
         self.theta_ = 0.0
 
         self.wheel_cmd_pub_ = self.create_publisher(Float64MultiArray, "simple_velocity_controller/commands", 10)
-        self.vel_sub_ = self.create_subscription(Twist, "bumperbot_controller/cmd_vel", self.velCallback, 10)
+        self.vel_sub_ = self.create_subscription(Twist, "bumperbot_controller/cmd_vel_unstamped", self.velCallback, 10)
         self.joint_sub_ = self.create_subscription(JointState,"joint_states", self.jointCallback, 10)        
         self.odom_pub_ = self.create_publisher(Odometry, "bumperbot_controller/odom", 10)
 
@@ -63,8 +63,8 @@ class SimpleController(Node):
     def velCallback(self, msg):
         # Implements the differential kinematic model
         # Given v and w, calculate the velocities of the wheels
-        robot_speed = np.array([[msg.twist.linear.x],
-                                [msg.twist.angular.z]])
+        robot_speed = np.array([[msg.linear.x],
+                                [msg.angular.z]])
         wheel_speed = np.matmul(np.linalg.inv(self.speed_conversion_), robot_speed) 
 
         wheel_speed_msg = Float64MultiArray()
