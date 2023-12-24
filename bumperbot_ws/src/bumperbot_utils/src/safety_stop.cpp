@@ -98,6 +98,8 @@ private:
         if (range <= danger_distance_)
         {
           state_ = State::DANGER;
+          // Stop immediately!
+          break;
         }
       }
     }
