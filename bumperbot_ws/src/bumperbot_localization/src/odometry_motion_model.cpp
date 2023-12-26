@@ -51,7 +51,7 @@ OdometryMotionModel::OdometryMotionModel(const std::string &name)
     alpha4_ = get_parameter("alpha4").as_double();
     nr_samples_ = get_parameter("nr_samples").as_int();
 
-    if(nr_samples_ >= 0){
+    if(nr_samples_ > 0){
         samples_.poses = std::vector<geometry_msgs::msg::Pose>(nr_samples_, geometry_msgs::msg::Pose());
     }
     else{
@@ -91,19 +91,17 @@ void OdometryMotionModel::odomCallback(const nav_msgs::msg::Odometry &odom)
     double odom_theta_increment = angle_diff(yaw, last_odom_theta_);
 
     // Motion Model
-    double delta_rot1, delta_trans, delta_rot2;
+    double delta_rot1 = 0.0;
     if (sqrt(
         std::pow(odom_y_increment, 2) +
-        std::pow(odom_x_increment, 2)) < 0.01)
+        std::pow(odom_x_increment, 2)) >= 0.01)
     {
-        delta_rot1 = 0.0;
-    } else {
         delta_rot1 = angle_diff(
         atan2(odom_y_increment, odom_x_increment),
         yaw);
     }
-	delta_trans = std::sqrt(std::pow(odom_x_increment, 2) + std::pow(odom_y_increment, 2));
-	delta_rot2 = angle_diff(odom_theta_increment, delta_rot1);
+	double delta_trans = std::sqrt(std::pow(odom_x_increment, 2) + std::pow(odom_y_increment, 2));
+	double delta_rot2 = angle_diff(odom_theta_increment, delta_rot1);
 
     // Noise Model that affects the Motion Model
     double rot1_variance = alpha1_ * delta_rot1 + alpha2_ * delta_trans;
