@@ -104,7 +104,7 @@ private:
       }
     }
 
-    if(state_ != prev_state_ || is_first_msg_)
+    if(state_ != prev_state_)
     {
       std_msgs::msg::Bool is_safety_stop;
       if(state_ == State::WARNING)
