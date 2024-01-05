@@ -24,6 +24,8 @@ private:
     double logodds2prob(double l);
 
     void poseToCell(const double px, const double py, unsigned int & c);
+    
+    bool poseOnMap(const double px, const double py);
 
     nav_msgs::msg::OccupancyGrid map_;
 

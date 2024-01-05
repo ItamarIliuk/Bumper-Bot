@@ -9,15 +9,15 @@ MappingWithKnownPoses::MappingWithKnownPoses(const std::string &name)
 {
     declare_parameter<double>("width", 100.0);
     declare_parameter<double>("height", 100.0);
-    declare_parameter<double>("resolution", 0.25);
+    declare_parameter<double>("resolution", 0.1);
 
     double width = get_parameter("width").as_double();
     double height = get_parameter("height").as_double();
     map_.info.resolution = get_parameter("resolution").as_double();
     map_.info.width = width / map_.info.resolution;
     map_.info.height = height / map_.info.resolution;
-    map_.info.origin.position.x = -width / 2.0;
-    map_.info.origin.position.y = -height / 2.0;
+    map_.info.origin.position.x = - width / 2.0;
+    map_.info.origin.position.y = - height / 2.0;
     map_.header.frame_id = "odom";
 
     // Init map with prior probability
@@ -34,10 +34,14 @@ MappingWithKnownPoses::MappingWithKnownPoses(const std::string &name)
 
 void MappingWithKnownPoses::poseToCell(const double px, const double py, unsigned int & c)
 {
-    double origin_x = map_.info.width / 2.0;
-    double origin_y = map_.info.height / 2.0;
-    c = map_.info.width * (std::round(py / map_.info.resolution) + origin_y) +
-        std::round(px / map_.info.resolution) + origin_x;
+    c = map_.info.width * std::round((py - map_.info.origin.position.y) / map_.info.resolution) +
+        std::round((px - map_.info.origin.position.x) / map_.info.resolution);
+}
+
+bool MappingWithKnownPoses::poseOnMap(const double px, const double py)
+{
+    return (px - map_.info.origin.position.x) < (map_.info.width * map_.info.resolution) && 
+           (py - map_.info.origin.position.y) < (map_.info.height * map_.info.resolution);
 }
 
 void MappingWithKnownPoses::scanCallback(const sensor_msgs::msg::LaserScan &scan)
@@ -53,20 +57,34 @@ void MappingWithKnownPoses::scanCallback(const sensor_msgs::msg::LaserScan &scan
         return;
     }
 
-    unsigned int cell;
-    poseToCell(t.transform.translation.x, t.transform.translation.y, cell);
+    // Check if pose is on the map
+    if(!poseOnMap(t.transform.translation.x, t.transform.translation.y))
+    {
+        RCLCPP_ERROR(get_logger(), "The robot is out of the Map!");
+        return;
+    }
 
-    RCLCPP_INFO_STREAM(get_logger(), "pose: [" << t.transform.translation.x << "," << 
-        t.transform.translation.y << "] = cell: " << cell);
+    tf2::Quaternion q(t.transform.rotation.x, t.transform.rotation.y, t.transform.rotation.z, t.transform.rotation.w);
+    tf2::Matrix3x3 m(q);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
 
-    // // tf2::Quaternion q(t.transform.rotation.x, t.transform.rotation.y, t.transform.rotation.z, t.transform.rotation.w);
-    // // tf2::Matrix3x3 m(q);
-    // // double roll, pitch, yaw;
-    // // m.getRPY(roll, pitch, yaw);
+    for (size_t i = 0; i < scan.ranges.size(); i++)
+    {
+      // Polar to cartesian coordinates
+      double angle = scan.angle_min + (i * scan.angle_increment) + yaw;
+      double px = scan.ranges.at(i) * std::cos(angle);
+      double py = scan.ranges.at(i) * std::sin(angle);
+      px += t.transform.translation.x;
+      py += t.transform.translation.y;
 
-    map_.data.at(cell) = 100;
+      unsigned int cell;
+      poseToCell(px, py, cell);
+
+      map_.data.at(cell) = 100;
+    }
+
     map_.header.stamp = get_clock()->now();
-
     map_pub_->publish(map_);
 }
 
