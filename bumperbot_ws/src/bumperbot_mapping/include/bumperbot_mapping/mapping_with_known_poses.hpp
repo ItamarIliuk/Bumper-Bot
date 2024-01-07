@@ -10,6 +10,14 @@
 #include "tf2_ros/transform_listener.h"
 #include "tf2_ros/buffer.h"
 
+struct Pose
+{
+    Pose() = default;
+    Pose(const int px, const int py) : x(px), y(py){}
+
+    int x;
+    int y;
+};
 
 class MappingWithKnownPoses : public rclcpp::Node
 {
@@ -17,15 +25,21 @@ public:
     MappingWithKnownPoses(const std::string& name);
 
 private:
-    void scanCallback(const sensor_msgs::msg::LaserScan &);
+    void scanCallback(const sensor_msgs::msg::LaserScan & scan);
 
     double prob2logodds(double p);
 
     double logodds2prob(double l);
 
-    void poseToCell(const double px, const double py, unsigned int & c);
+    std::vector<uint8_t> inverseSensorModel(const Pose & p_robot, const Pose & p_beam);
+
+    std::vector<Pose> bresenham(const Pose & start, const Pose & end);
+
+    unsigned int poseToCell(const Pose & pose);
+
+    Pose coordinatesToPose(const double px, const double py);
     
-    bool poseOnMap(const double px, const double py);
+    bool poseOnMap(const Pose & pose);
 
     nav_msgs::msg::OccupancyGrid map_;
 

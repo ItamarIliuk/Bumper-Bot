@@ -32,16 +32,23 @@ MappingWithKnownPoses::MappingWithKnownPoses(const std::string &name)
     map_pub_ = create_publisher<nav_msgs::msg::OccupancyGrid>("map", qos_profile_pub);
 }
 
-void MappingWithKnownPoses::poseToCell(const double px, const double py, unsigned int & c)
+unsigned int MappingWithKnownPoses::poseToCell(const Pose & pose)
 {
-    c = map_.info.width * std::round((py - map_.info.origin.position.y) / map_.info.resolution) +
-        std::round((px - map_.info.origin.position.x) / map_.info.resolution);
+    return map_.info.width * pose.y + pose.x;
 }
 
-bool MappingWithKnownPoses::poseOnMap(const double px, const double py)
+Pose MappingWithKnownPoses::coordinatesToPose(const double px, const double py)
 {
-    return (px - map_.info.origin.position.x) < (map_.info.width * map_.info.resolution) && 
-           (py - map_.info.origin.position.y) < (map_.info.height * map_.info.resolution);
+    Pose pose;
+    pose.x = std::round((px - map_.info.origin.position.x) / map_.info.resolution);
+    pose.y = std::round((py - map_.info.origin.position.y) / map_.info.resolution);
+    return pose;
+}
+
+bool MappingWithKnownPoses::poseOnMap(const Pose & pose)
+{
+    return pose.x < (map_.info.width * map_.info.resolution) - map_.info.origin.position.x && 
+           pose.y < (map_.info.height * map_.info.resolution) - map_.info.origin.position.y;
 }
 
 void MappingWithKnownPoses::scanCallback(const sensor_msgs::msg::LaserScan &scan)
@@ -58,7 +65,8 @@ void MappingWithKnownPoses::scanCallback(const sensor_msgs::msg::LaserScan &scan
     }
 
     // Check if pose is on the map
-    if(!poseOnMap(t.transform.translation.x, t.transform.translation.y))
+    Pose robot_p = coordinatesToPose(t.transform.translation.x, t.transform.translation.y);
+    if(!poseOnMap(robot_p))
     {
         RCLCPP_ERROR(get_logger(), "The robot is out of the Map!");
         return;
@@ -78,9 +86,8 @@ void MappingWithKnownPoses::scanCallback(const sensor_msgs::msg::LaserScan &scan
       px += t.transform.translation.x;
       py += t.transform.translation.y;
 
-      unsigned int cell;
-      poseToCell(px, py, cell);
-
+      Pose beam_p = coordinatesToPose(px, py);
+      unsigned int cell = poseToCell(beam_p);
       map_.data.at(cell) = 100;
     }
 
@@ -96,6 +103,70 @@ double MappingWithKnownPoses::prob2logodds(double p)
 double MappingWithKnownPoses::logodds2prob(double l)
 {
     return 1 - (1 / (1 + std::exp(l)));
+}
+
+std::vector<Pose> MappingWithKnownPoses::bresenham(const Pose & start, const Pose & end)
+{
+    // Implementation of Bresenham's line drawing algorithm
+    // See en.wikipedia.org/wiki/Bresenham's_line_algorithm
+    std::vector<Pose> line;
+
+    int dx = std::abs(end.x - start.x);
+    int dy = std::abs(end.y - start.y);
+
+    int xsign = dx > 0 ? 1 : -1;
+    int ysign = dy > 0 ? 1 : -1;
+
+    int xx, xy, yx, yy;
+    if(dx > dy)
+    {
+        xx = xsign;
+        xy = 0;
+        yx = 0;
+        yy = ysign;
+    }
+    else
+    {
+        int tmp = dx;
+        dx = dy;
+        dy = tmp;
+        xx = 0;
+        xy = ysign;
+        yx = xsign;
+        yy = 0;
+    }
+
+    int D = 2 * dy - dx;
+    int y = 0;
+
+    line.reserve(dx + 1);
+    for (int i = 0; i < dx + 1; i++)
+    {
+        line.emplace_back(Pose(start.x + i * xx + y * yx, start.y + i * xy + y * yy));
+        if(D >= 0)
+        {
+            y++;
+            D -= 2 * dx;
+        }
+        D += 2 * dy;
+    }
+
+    return line;
+}
+
+std::vector<uint8_t> MappingWithKnownPoses::inverseSensorModel(const Pose & p_robot, const Pose & p_beam)
+{
+    std::vector<uint8_t> occ_values;
+    std::vector<Pose> line = bresenham(p_robot, p_beam);
+    occ_values.reserve(line.size());
+
+    for (size_t i = 0; i < line.size() - 1u; i++)
+    {
+        occ_values.push_back(0);  // FREE
+    }
+
+    occ_values.push_back(100);  // OCCUPIED
+    return occ_values;
 }
 
 int main(int argc, char *argv[])
