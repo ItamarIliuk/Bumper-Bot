@@ -7,17 +7,17 @@ using std::placeholders::_1;
 MappingWithKnownPoses::MappingWithKnownPoses(const std::string &name)
     : Node(name)
 {
-    declare_parameter<double>("width", 100.0);
-    declare_parameter<double>("height", 100.0);
+    declare_parameter<double>("width", 50.0);
+    declare_parameter<double>("height", 50.0);
     declare_parameter<double>("resolution", 0.1);
 
     double width = get_parameter("width").as_double();
     double height = get_parameter("height").as_double();
     map_.info.resolution = get_parameter("resolution").as_double();
-    map_.info.width = width / map_.info.resolution;
-    map_.info.height = height / map_.info.resolution;
-    map_.info.origin.position.x = - width / 2.0;
-    map_.info.origin.position.y = - height / 2.0;
+    map_.info.width = std::round(width / map_.info.resolution);
+    map_.info.height = std::round(height / map_.info.resolution);
+    map_.info.origin.position.x = - std::round(width / 2.0);
+    map_.info.origin.position.y = - std::round(height / 2.0);
     map_.header.frame_id = "odom";
 
     // Init map with prior probability
@@ -27,9 +27,7 @@ MappingWithKnownPoses::MappingWithKnownPoses(const std::string &name)
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     scan_sub_ = create_subscription<sensor_msgs::msg::LaserScan>(
         "scan", 10, std::bind(&MappingWithKnownPoses::scanCallback, this, _1));
-    rclcpp::QoS qos_profile_pub(10);
-    qos_profile_pub.durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL);
-    map_pub_ = create_publisher<nav_msgs::msg::OccupancyGrid>("map", qos_profile_pub);
+    map_pub_ = create_publisher<nav_msgs::msg::OccupancyGrid>("map", 1);
 }
 
 unsigned int MappingWithKnownPoses::poseToCell(const Pose & pose)
@@ -47,8 +45,8 @@ Pose MappingWithKnownPoses::coordinatesToPose(const double px, const double py)
 
 bool MappingWithKnownPoses::poseOnMap(const Pose & pose)
 {
-    return pose.x < (map_.info.width * map_.info.resolution) - map_.info.origin.position.x && 
-           pose.y < (map_.info.height * map_.info.resolution) - map_.info.origin.position.y;
+    return pose.x < map_.info.width  && pose.x >= 0 &&
+           pose.y < map_.info.height && pose.y >= 0;
 }
 
 void MappingWithKnownPoses::scanCallback(const sensor_msgs::msg::LaserScan &scan)
@@ -72,7 +70,10 @@ void MappingWithKnownPoses::scanCallback(const sensor_msgs::msg::LaserScan &scan
         return;
     }
 
-    tf2::Quaternion q(t.transform.rotation.x, t.transform.rotation.y, t.transform.rotation.z, t.transform.rotation.w);
+    tf2::Quaternion q(t.transform.rotation.x,
+        t.transform.rotation.y,
+        t.transform.rotation.z,
+        t.transform.rotation.w);
     tf2::Matrix3x3 m(q);
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
@@ -87,8 +88,20 @@ void MappingWithKnownPoses::scanCallback(const sensor_msgs::msg::LaserScan &scan
       py += t.transform.translation.y;
 
       Pose beam_p = coordinatesToPose(px, py);
-      unsigned int cell = poseToCell(beam_p);
-      map_.data.at(cell) = 100;
+      if(!poseOnMap(beam_p))
+      {
+        continue;
+      }
+      std::vector<std::pair<Pose, uint8_t>> poses = inverseSensorModel(robot_p, beam_p);
+
+      for(const auto & pose : poses)
+      {
+        if(poseOnMap(pose.first))
+        {
+            unsigned int cell = poseToCell(pose.first);
+            map_.data.at(cell) = pose.second;
+        }
+      }
     }
 
     map_.header.stamp = get_clock()->now();
@@ -111,11 +124,14 @@ std::vector<Pose> MappingWithKnownPoses::bresenham(const Pose & start, const Pos
     // See en.wikipedia.org/wiki/Bresenham's_line_algorithm
     std::vector<Pose> line;
 
-    int dx = std::abs(end.x - start.x);
-    int dy = std::abs(end.y - start.y);
+    int dx = end.x - start.x;
+    int dy = end.y - start.y;
 
     int xsign = dx > 0 ? 1 : -1;
     int ysign = dy > 0 ? 1 : -1;
+
+    dx = std::abs(dx);
+    dy = std::abs(dy);
 
     int xx, xy, yx, yy;
     if(dx > dy)
@@ -154,18 +170,18 @@ std::vector<Pose> MappingWithKnownPoses::bresenham(const Pose & start, const Pos
     return line;
 }
 
-std::vector<uint8_t> MappingWithKnownPoses::inverseSensorModel(const Pose & p_robot, const Pose & p_beam)
+std::vector<std::pair<Pose, uint8_t>> MappingWithKnownPoses::inverseSensorModel(const Pose & p_robot, const Pose & p_beam)
 {
-    std::vector<uint8_t> occ_values;
+    std::vector<std::pair<Pose, uint8_t>> occ_values;
     std::vector<Pose> line = bresenham(p_robot, p_beam);
     occ_values.reserve(line.size());
 
     for (size_t i = 0; i < line.size() - 1u; i++)
     {
-        occ_values.push_back(0);  // FREE
+        occ_values.emplace_back(std::pair<Pose, uint8_t>(line.at(i), 0));  // FREE
     }
 
-    occ_values.push_back(100);  // OCCUPIED
+    occ_values.emplace_back(std::pair<Pose, uint8_t>(line.back(), 100));  // OCCUPIED
     return occ_values;
 }
 

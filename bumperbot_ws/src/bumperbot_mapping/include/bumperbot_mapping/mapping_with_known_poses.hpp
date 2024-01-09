@@ -31,7 +31,7 @@ private:
 
     double logodds2prob(double l);
 
-    std::vector<uint8_t> inverseSensorModel(const Pose & p_robot, const Pose & p_beam);
+    std::vector<std::pair<Pose, uint8_t>> inverseSensorModel(const Pose & p_robot, const Pose & p_beam);
 
     std::vector<Pose> bresenham(const Pose & start, const Pose & end);
 
