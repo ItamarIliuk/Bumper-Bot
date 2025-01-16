@@ -54,8 +54,6 @@ Visualization Manager:
         All Enabled: true
         base_footprint:
           Value: true
-        base_footprint_noisy:
-          Value: true
         base_link:
           Value: true
         caster_front_link:
